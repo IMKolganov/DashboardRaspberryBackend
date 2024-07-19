@@ -1,0 +1,9 @@
+﻿version: '3.4'
+
+services:
+  app:
+    image: dashboard-raspberry-backend
+    ports:
+      - "3001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
