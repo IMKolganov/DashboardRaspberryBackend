@@ -4,6 +4,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
+// Add services to the container.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -22,13 +28,14 @@ builder.Services.AddHttpClient("MicroserviceClient", client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 
-
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
+var environment = app.Environment.EnvironmentName;
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if(environment == "Docker" || app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
@@ -50,10 +57,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseCors("AllowAllOrigins");
+
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 app.Run();
 
@@ -61,4 +69,5 @@ app.Run();
 //docker stop dashboard-raspberry-backend-container || true && \
 //docker rm dashboard-raspberry-backend-container || true && \
 //docker build -t dashboard-raspberry-backend . && \
-//docker run -d -p 3001:80 --name dashboard-raspberry-backend-container -e ASPNETCORE_ENVIRONMENT=Development dashboard-raspberry-backend;
+//docker run -d -p 3001:80--name dashboard-raspberry-backend-container -e ASPNETCORE_ENVIRONMENT=Docker dashboard-raspberry-backend;
+

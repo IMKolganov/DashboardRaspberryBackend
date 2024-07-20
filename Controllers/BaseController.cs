@@ -43,7 +43,7 @@ public class BaseApiController : ControllerBase
         {
             var errorMessage = ex.Message;
             _logger.LogError(ex, "An error occurred while calling the external microservice. Message: {Message}", errorMessage);
-            return StatusCode(500, new { error = "Failed to call the external microservice", details = errorMessage });
+            return StatusCode(500, new { error = $"Failed to call the external microservice. url: {url}", details = errorMessage });
         }
     }
 

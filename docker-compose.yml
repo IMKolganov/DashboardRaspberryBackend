@@ -1,9 +1,16 @@
-﻿version: '3.4'
+﻿version: '3.8'
 
 services:
-  app:
+  backend:
     image: dashboard-raspberry-backend
     ports:
       - "3001:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
+    depends_on:
+      - ms-get-temperature-and-humidify
+
+  ms-get-temperature-and-humidify:
+    image: ms-get-temp-and-humd
+    ports:
+      - "5000:5000"
