@@ -6,24 +6,24 @@ namespace DashboardRaspberryBackend.Controllers;
 [Route("[controller]")]
 public class ApiController : BaseApiController
 {
-    private readonly string _getTemperatureAndHumidifyUrl;
-    private readonly string _getSoilMoistureUrl;
+    private readonly string _msTemperatureAndHumidifyUrl;
+    private readonly string _msSoilMoistureUrl;
 
 
     public ApiController(ILogger<ApiController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         : base(logger, httpClientFactory, configuration)
     {
-        _getTemperatureAndHumidifyUrl = configuration["MicroserviceSettings:GetTemperatureAndHumidifyUrl"];
-        _getSoilMoistureUrl = configuration["MicroserviceSettings:GetSoilMoistureUrl"];
+        _msTemperatureAndHumidifyUrl = configuration["MicroserviceSettings:GetTemperatureAndHumidifyUrl"];
+        _msSoilMoistureUrl = configuration["MicroserviceSettings:GetSoilMoistureUrl"];
 
-        if (string.IsNullOrWhiteSpace(_getTemperatureAndHumidifyUrl))
+        if (string.IsNullOrWhiteSpace(_msTemperatureAndHumidifyUrl))
         {
             throw new ArgumentException("Microservice GetTemperatureAndHumidifyUrl is not configured.");
         }
 
-        _getSoilMoistureUrl = configuration["MicroserviceSettings:GetSoilMoistureUrl"];
+        _msSoilMoistureUrl = configuration["MicroserviceSettings:GetSoilMoistureUrl"];
 
-        if (string.IsNullOrWhiteSpace(_getSoilMoistureUrl))
+        if (string.IsNullOrWhiteSpace(_msSoilMoistureUrl))
         {
             throw new ArgumentException("Microservice GetSoilMoistureUrl is not configured.");
         }
@@ -32,12 +32,12 @@ public class ApiController : BaseApiController
     [HttpGet("GetTemperatureAndHumidify")]
     public async Task<IActionResult> GetTemperatureAndHumidify()
     {
-        return await CallExternalMicroserviceAsync(_getTemperatureAndHumidifyUrl + "/get-temperature-and-humidify");
+        return await CallExternalMicroserviceAsync(_msTemperatureAndHumidifyUrl + "/get-temperature-and-humidify");
     }
 
     [HttpGet("GetSoilMoisture")]
     public async Task<IActionResult> GetSoilMoisture()
     {
-        return await CallExternalMicroserviceAsync(_getSoilMoistureUrl + "/get-soil-moisture");
+        return await CallExternalMicroserviceAsync(_msSoilMoistureUrl + "/get-soil-moisture");
     }
 }
