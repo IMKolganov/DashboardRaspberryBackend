@@ -12,12 +12,24 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Models\" />
+    <None Remove="Messaging\" />
+    <None Remove="Messaging\Models\" />
+    <None Remove="Services\" />
+    <None Remove="Middleware\" />
+    <None Remove="Middleware\Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
+    <Folder Include="Messaging\" />
+    <Folder Include="Messaging\Models\" />
+    <Folder Include="Services\" />
+    <Folder Include="Middleware\" />
+    <Folder Include="Middleware\Extensions\" />
   </ItemGroup>
 </Project>

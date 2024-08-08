@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using DashboardRaspberryBackend.Services;
 
 namespace DashboardRaspberryBackend.Controllers;
 
@@ -6,38 +8,18 @@ namespace DashboardRaspberryBackend.Controllers;
 [Route("[controller]")]
 public class ApiController : BaseApiController
 {
-    private readonly string _msTemperatureAndHumidifyUrl;
-    private readonly string _msSoilMoistureUrl;
+    private readonly TemperatureService _temperatureService;
 
-
-    public ApiController(ILogger<ApiController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public ApiController(ILogger<ApiController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, TemperatureService temperatureService)
         : base(logger, httpClientFactory, configuration)
     {
-        _msTemperatureAndHumidifyUrl = configuration["MicroserviceSettings:GetTemperatureAndHumidifyUrl"];
-        _msSoilMoistureUrl = configuration["MicroserviceSettings:GetSoilMoistureUrl"];
-
-        if (string.IsNullOrWhiteSpace(_msTemperatureAndHumidifyUrl))
-        {
-            throw new ArgumentException("Microservice GetTemperatureAndHumidifyUrl is not configured.");
-        }
-
-        _msSoilMoistureUrl = configuration["MicroserviceSettings:GetSoilMoistureUrl"];
-
-        if (string.IsNullOrWhiteSpace(_msSoilMoistureUrl))
-        {
-            throw new ArgumentException("Microservice GetSoilMoistureUrl is not configured.");
-        }
+        _temperatureService = temperatureService;
     }
 
     [HttpGet("GetTemperatureAndHumidify")]
     public async Task<IActionResult> GetTemperatureAndHumidify()
     {
-        return await CallExternalMicroserviceAsync(_msTemperatureAndHumidifyUrl + "/get-temperature-and-humidify");
-    }
-
-    [HttpGet("GetSoilMoisture")]
-    public async Task<IActionResult> GetSoilMoisture()
-    {
-        return await CallExternalMicroserviceAsync(_msSoilMoistureUrl + "/get-soil-moisture");
+        var data = await _temperatureService.GetTemperatureAndHumidifyData();
+        return Ok(data);
     }
 }
