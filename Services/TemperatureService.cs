@@ -22,7 +22,7 @@ public class TemperatureService
         var request = new TemperatureRequest
         {
             RequestId = requestId,
-            Url = "/get-temperature-and-humidify"
+            Url = "/get-temperature-and-humidify?isDev=1"
         };
 
         try
