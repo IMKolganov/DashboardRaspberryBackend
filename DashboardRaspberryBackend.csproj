@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Models\" />
     <None Remove="Messaging\" />
     <None Remove="Messaging\Models\" />
     <None Remove="Services\" />
@@ -25,7 +24,6 @@
     <None Remove="Middleware\Extensions\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
     <Folder Include="Messaging\" />
     <Folder Include="Messaging\Models\" />
     <Folder Include="Services\" />

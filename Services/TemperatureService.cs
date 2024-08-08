@@ -1,8 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using DashboardRaspberryBackend.Messaging;
+﻿using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Models;
-using Microsoft.Extensions.Logging;
 
 namespace DashboardRaspberryBackend.Services;
 
@@ -34,15 +31,20 @@ public class TemperatureService
             _rabbitMqProducer.SendMessage(request, "temperatureQueue");
             _logger.LogInformation("Message sent to temperatureQueue with RequestId: {RequestId}", requestId);
 
-            // Ожидание ответа
-            var response = await _rabbitMqConsumer.GetMessageAsync<TemperatureResponse>("temperatureResponseQueue", requestId);
+            // Ожидание ответа с таймаутом в 30 секунд
+            var response = await _rabbitMqConsumer.GetMessageAsync<TemperatureResponse>("temperatureResponseQueue", requestId, 30);
             _logger.LogInformation("Received response from temperatureResponseQueue for RequestId: {RequestId}", requestId);
 
             return response.Data;
         }
+        catch (TimeoutException ex)
+        {
+            _logger.LogError(ex, "Timeout occurred while waiting for temperature and humidity data.");
+            throw;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving temperature and humidity data.");
+            _logger.LogError(ex, "Error occurred while getting temperature and humidity data.");
             throw;
         }
     }

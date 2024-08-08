@@ -1,13 +1,11 @@
-﻿using System;
+﻿using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace DashboardRaspberryBackend.Messaging;
 
-public class RabbitMqConsumer
+public class RabbitMqConsumer : IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
@@ -17,11 +15,19 @@ public class RabbitMqConsumer
         var factory = new ConnectionFactory() { HostName = "localhost" };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
+
+        // Создание очередей при инициализации
+        _channel.QueueDeclare(queue: "temperatureQueue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+        _channel.QueueDeclare(queue: "temperatureResponseQueue", durable: false, exclusive: false, autoDelete: false, arguments: null);
     }
 
-    public Task<T> GetMessageAsync<T>(string queueName, string correlationId)
+    public async Task<T> GetMessageAsync<T>(string queueName, string correlationId, int timeoutSeconds)
     {
         var tcs = new TaskCompletionSource<T>();
+        var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+        var token = cancellationTokenSource.Token;
+
+        token.Register(() => tcs.TrySetCanceled(), useSynchronizationContext: false);
 
         var consumer = new EventingBasicConsumer(_channel);
         consumer.Received += (model, ea) =>
@@ -32,12 +38,25 @@ public class RabbitMqConsumer
 
             if (ea.BasicProperties.CorrelationId == correlationId)
             {
-                tcs.SetResult(response);
+                tcs.TrySetResult(response);
             }
         };
 
         _channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
 
-        return tcs.Task;
+        try
+        {
+            return await tcs.Task;
+        }
+        catch (TaskCanceledException)
+        {
+            throw new TimeoutException($"The operation has timed out after {timeoutSeconds} seconds.");
+        }
+    }
+
+    public void Dispose()
+    {
+        _channel?.Dispose();
+        _connection?.Dispose();
     }
 }
