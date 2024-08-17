@@ -26,13 +26,18 @@ public class RabbitMqConsumer<T> : IDisposable
         // Declare and consume all queues
         foreach (var queueName in _queueNames)
         {
-            _channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false,
+            _channel.QueueDeclare(queue: queueName, 
+                durable: false, 
+                exclusive: false, 
+                autoDelete: false,
                 arguments: null);
 
             // Initialize the consumer and attach the Received event handler
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnMessageReceived;
-            _channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
+            var consumerTag = _channel.BasicConsume(
+                queue: queueName, autoAck: false, consumer: consumer);
+            Console.WriteLine($"Consumer started with tag: {consumerTag}");
         }
     }
 
@@ -81,7 +86,8 @@ public class RabbitMqConsumer<T> : IDisposable
         {
             // Log a warning or take action for unexpected correlation ID
             Console.WriteLine(
-                $"Warning: Received message with unexpected CorrelationId: {ea.BasicProperties.CorrelationId}");
+                $"Warning: Received message with unexpected CorrelationId: " +
+                $"{ea.BasicProperties.CorrelationId}");
 
             // Optionally reject the message so it can be requeued or discarded
             //_channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
