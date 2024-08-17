@@ -9,8 +9,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="36a326c0-7a1a-4b5f-a780-1d9eb84627f8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Messaging/Models/RequestState.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Storages/RequestStorage.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DashboardRaspberryBackend.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/DashboardRaspberryBackend.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -25,6 +28,10 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/482fdb527a544b2b9b88eef0f7ebda9919d800/03/6ca460a2/JsonSerializer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/482fdb527a544b2b9b88eef0f7ebda9919d800/a4/80cf9857/ThrowHelper.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bef7dd7c478a4028be605df293b1fba7209a00/2f/6b46473f/ActionMethodExecutor.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00b2c98b5c8441e901819b3019d902540200/49/42b6ee7b/ConcurrentDictionary`2.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f71d6636b61d4628ba587b290ab38c02b58200/b3/074c9ca1/Monitor.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/119095f31438ebf4941c9c4b67fcc487ef1175bec54b503414bfcfe77dae50/IModel.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/496d2964d1dd11c8a8611b6cea95665d9a78c7826f0d487f5d0ab601047da24/IModelExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/d1f68ef86315497c7b39ddb155d5cf3ace964abca69857f9943cd58479799/ServiceProvider.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
@@ -103,7 +110,7 @@
       <updated>1721468285332</updated>
       <workItem from="1721468286658" duration="2263000" />
       <workItem from="1723400394858" duration="6764000" />
-      <workItem from="1723811588292" duration="19732000" />
+      <workItem from="1723811588292" duration="25199000" />
     </task>
     <servers />
   </component>
@@ -124,5 +131,24 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs</url>
+          <line>94</line>
+          <properties documentPath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" containingFunctionPresentation="Method 'OnMessageReceived'">
+            <startOffsets>
+              <option value="3396" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3527" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="32" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

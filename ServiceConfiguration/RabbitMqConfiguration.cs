@@ -1,5 +1,6 @@
 using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Models;
+using DashboardRaspberryBackend.Messaging.Storages;
 using DashboardRaspberryBackend.Services;
 
 namespace DashboardRaspberryBackend.ServiceConfiguration;
@@ -9,6 +10,8 @@ public static class RabbitMqConfiguration
     public static void AddRabbitMqServices(this IServiceCollection services, 
         IConfiguration configuration)
     {
+        // services.AddSingleton<RequestStorage>();
+        
         services.AddSingleton<RabbitMqProducer>(sp =>
         {
             var requestQueueNames = configuration.GetSection(
@@ -20,6 +23,8 @@ public static class RabbitMqConfiguration
         {
             var responseQueueNames = configuration.GetSection(
                 "RabbitMqSettings:ResponseQueues").Get<List<string>>();
+            // var requestStorage = sp.GetRequiredService<RequestStorage>();
+            // return new RabbitMqConsumer<TemperatureResponse>(requestStorage, responseQueueNames);
             return new RabbitMqConsumer<TemperatureResponse>(responseQueueNames);
         });
         

@@ -26,9 +26,9 @@ public class RabbitMqConsumer<T> : IDisposable
         // Declare and consume all queues
         foreach (var queueName in _queueNames)
         {
-            _channel.QueueDeclare(queue: queueName, 
-                durable: false, 
-                exclusive: false, 
+            _channel.QueueDeclare(queue: queueName,
+                durable: false,
+                exclusive: false,
                 autoDelete: false,
                 arguments: null);
 
@@ -46,6 +46,8 @@ public class RabbitMqConsumer<T> : IDisposable
         var tcs = new TaskCompletionSource<T>();
         _pendingRequests[correlationId] = tcs;
 
+        Console.WriteLine($"Request with CorrelationId {correlationId} registered.");
+        
         var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(T));
         var completedTask = await Task.WhenAny(tcs.Task, timeoutTask);
 
@@ -71,6 +73,8 @@ public class RabbitMqConsumer<T> : IDisposable
                 // Deserialize the message and complete the task
                 var response = JsonConvert.DeserializeObject<T>(message);
                 tcs.TrySetResult(response);
+                Console.WriteLine(
+                    $"Response received and deserialized for CorrelationId: {ea.BasicProperties.CorrelationId}");
             }
             catch (JsonException jsonEx)
             {
@@ -80,20 +84,19 @@ public class RabbitMqConsumer<T> : IDisposable
             {
                 // Manually acknowledge the message after processing
                 _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                Console.WriteLine($"BasicAck Manually {ea.DeliveryTag}");
             }
         }
         else
         {
+            //todo: need use RequestState and RequestStorage...
             // Log a warning or take action for unexpected correlation ID
             Console.WriteLine(
-                $"Warning: Received message with unexpected CorrelationId: " +
-                $"{ea.BasicProperties.CorrelationId}");
+                $"Warning: Received message with unexpected CorrelationId: {ea.BasicProperties.CorrelationId}");
 
             // Optionally reject the message so it can be requeued or discarded
-            //_channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
-
-            // Acknowledge messages that do not match the correlation ID to prevent re-processing
-            _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+            _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
+            Console.WriteLine($"BasicNack requeue: true for CorrelationId: {ea.BasicProperties.CorrelationId}");
         }
     }
 
