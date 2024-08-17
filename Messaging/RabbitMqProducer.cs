@@ -1,6 +1,7 @@
-﻿using RabbitMQ.Client;
+﻿using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using RabbitMQ.Client;
 
 namespace DashboardRaspberryBackend.Messaging;
 
@@ -8,22 +9,35 @@ public class RabbitMqProducer : IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
+    private readonly List<string> _queueNames;
 
-    public RabbitMqProducer()
+    public RabbitMqProducer(List<string> queueNames)
     {
         var factory = new ConnectionFactory() { HostName = "localhost" };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
+        _queueNames = queueNames ?? new List<string>();
 
-        // Создание очередей при инициализации
-        _channel.QueueDeclare(queue: "temperatureQueue", durable: false, exclusive: false, autoDelete: false, arguments: null);
-        _channel.QueueDeclare(queue: "temperatureResponseQueue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+        // Declare all queues to ensure they exist
+        foreach (var queueName in _queueNames)
+        {
+            _channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false,
+                arguments: null);
+        }
     }
 
-    public void SendMessage<T>(T message, string queueName)
+    public void SendMessage<T>(T message, string queueName, IBasicProperties props)
     {
         var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
-        _channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
+        _channel.BasicPublish(exchange: string.Empty,
+            routingKey: queueName,
+            basicProperties: props,
+            body: body);
+    }
+
+    public IBasicProperties CreateBasicProperties()
+    {
+        return _channel.CreateBasicProperties();
     }
 
     public void Dispose()

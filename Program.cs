@@ -1,4 +1,5 @@
 using DashboardRaspberryBackend.Messaging;
+using DashboardRaspberryBackend.Messaging.Models;
 using DashboardRaspberryBackend.Middleware.Extensions;
 using DashboardRaspberryBackend.Services;
 
@@ -36,12 +37,25 @@ builder.Services.AddHttpClient("SoilMoistureService", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["MicroserviceSettings:GetSoilMoistureUrl"]);
 });
-builder.Services.AddSingleton<RabbitMqProducer>();
-builder.Services.AddSingleton<RabbitMqConsumer>();
+
+
+// Register services
+builder.Services.AddSingleton<RabbitMqProducer>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var requestQueueNames = configuration.GetSection("RabbitMqSettings:RequestQueues").Get<List<string>>();
+    return new RabbitMqProducer(requestQueueNames);
+});
+builder.Services.AddSingleton<RabbitMqConsumer<TemperatureResponse>>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var responseQueueNames = configuration.GetSection("RabbitMqSettings:ResponseQueues").Get<List<string>>();
+    return new RabbitMqConsumer<TemperatureResponse>(responseQueueNames);
+});
 builder.Services.AddScoped<TemperatureService>();
 
 // Register HttpClientFactory
-builder.Services.AddHttpClient();
+// builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -79,10 +93,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
-//docker stop dashboard-raspberry-backend-container || true && \
-//docker rm dashboard-raspberry-backend-container || true && \
-//docker build -t dashboard-raspberry-backend . && \
-//docker run -d -p 3001:80--name dashboard-raspberry-backend-container -e ASPNETCORE_ENVIRONMENT=Docker dashboard-raspberry-backend;
-

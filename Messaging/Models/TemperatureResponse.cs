@@ -2,6 +2,6 @@
 
 public class TemperatureResponse
 {
-    public string RequestId { get; set; }
-    public string Data { get; set; }
+    public double Temperature { get; set; }
+    public double Humidity { get; set; }
 }

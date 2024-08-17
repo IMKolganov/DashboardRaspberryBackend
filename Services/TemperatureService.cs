@@ -1,41 +1,50 @@
 ﻿using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Models;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace DashboardRaspberryBackend.Services;
 
 public class TemperatureService
 {
     private readonly RabbitMqProducer _rabbitMqProducer;
-    private readonly RabbitMqConsumer _rabbitMqConsumer;
+    private readonly RabbitMqConsumer<TemperatureResponse> _rabbitMqConsumer;
     private readonly ILogger<TemperatureService> _logger;
 
-    public TemperatureService(RabbitMqProducer rabbitMqProducer, RabbitMqConsumer rabbitMqConsumer, ILogger<TemperatureService> logger)
+    public TemperatureService(RabbitMqProducer rabbitMqProducer, RabbitMqConsumer<TemperatureResponse> rabbitMqConsumer,
+        ILogger<TemperatureService> logger)
     {
         _rabbitMqProducer = rabbitMqProducer;
         _rabbitMqConsumer = rabbitMqConsumer;
         _logger = logger;
     }
 
-    public async Task<string> GetTemperatureAndHumidifyData()
+    public async Task<TemperatureResponse> GetTemperatureAndHumidifyData()
     {
         var requestId = Guid.NewGuid().ToString();
         var request = new TemperatureRequest
         {
-            RequestId = requestId,
             Url = "/get-temperature-and-humidify?isDev=1"
         };
 
         try
         {
+            var props = _rabbitMqProducer.CreateBasicProperties();
+            props.CorrelationId = requestId;
+            props.ReplyTo = "temperatureResponseQueue";
             // Отправка сообщения в очередь
-            _rabbitMqProducer.SendMessage(request, "temperatureQueue");
-            _logger.LogInformation("Message sent to temperatureQueue with RequestId: {RequestId}", requestId);
+            _rabbitMqProducer.SendMessage(request, "temperatureRequestQueue", props);
+            _logger.LogInformation("Message sent to temperatureRequestQueue with " +
+                                   "RequestId: {RequestId}", requestId);
 
             // Ожидание ответа с таймаутом в 30 секунд
-            var response = await _rabbitMqConsumer.GetMessageAsync<TemperatureResponse>("temperatureResponseQueue", requestId, 30);
-            _logger.LogInformation("Received response from temperatureResponseQueue for RequestId: {RequestId}", requestId);
+            Console.WriteLine(requestId);
+            var response = await _rabbitMqConsumer.GetMessageAsync(requestId, timeout: new TimeSpan(0, 0, 30));
+            _logger.LogInformation("Received response from temperatureResponseQueue for " +
+                                   "RequestId: {RequestId}", requestId);
 
-            return response.Data;
+            return response;
         }
         catch (TimeoutException ex)
         {
