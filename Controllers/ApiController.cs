@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using DashboardRaspberryBackend.Services;
 
 namespace DashboardRaspberryBackend.Controllers;

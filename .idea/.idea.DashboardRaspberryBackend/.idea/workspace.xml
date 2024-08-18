@@ -9,9 +9,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="36a326c0-7a1a-4b5f-a780-1d9eb84627f8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqConsumer.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqProducer.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqResponceFactory.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Models/Interfaces/IRabbitMqResponse.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Models/SoilMoistureResponse.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/RabbitMqResponseFactory.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Controllers/ApiController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/ApiController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Messaging/Models/TemperatureResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/TemperatureResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Services/TemperatureService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/TemperatureService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,9 +36,15 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/482fdb527a544b2b9b88eef0f7ebda9919d800/a4/80cf9857/ThrowHelper.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bef7dd7c478a4028be605df293b1fba7209a00/2f/6b46473f/ActionMethodExecutor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00b2c98b5c8441e901819b3019d902540200/49/42b6ee7b/ConcurrentDictionary`2.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f71d6636b61d4628ba587b290ab38c02b58200/41/c2992e4f/RuntimeType.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f71d6636b61d4628ba587b290ab38c02b58200/57/350aae9e/IDisposable.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f71d6636b61d4628ba587b290ab38c02b58200/b3/074c9ca1/Monitor.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f71d6636b61d4628ba587b290ab38c02b58200/f0/6a0c83fe/TaskCompletionSource`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f71d6636b61d4628ba587b290ab38c02b58200/f5/cf08ac17/ThrowHelper.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/119095f31438ebf4941c9c4b67fcc487ef1175bec54b503414bfcfe77dae50/IModel.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/496d2964d1dd11c8a8611b6cea95665d9a78c7826f0d487f5d0ab601047da24/IModelExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/6518e12429e640b855e84dbcb556279a6dcdecc0f25132fcbc5510f956f771e7/CallSiteFactory.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/79e4164404d2be7b9d0cd51036b545bd14f5807c558d20f7cd375d4fd8ff23/ConnectionFactory.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/d1f68ef86315497c7b39ddb155d5cf3ace964abca69857f9943cd58479799/ServiceProvider.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
@@ -40,27 +56,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.DashboardRaspberryBackend.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.DashboardRaspberryBackend.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "rider.external.source.directories": [
-      "/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache",
-      "/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache",
-      "/Users/rackot/Library/Application Support/Symbols/src"
+  &quot;keyToStringList&quot;: {
+    &quot;rider.external.source.directories&quot;: [
+      &quot;/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache&quot;,
+      &quot;/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache&quot;,
+      &quot;/Users/rackot/Library/Application Support/Symbols/src&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.DashboardRaspberryBackend">
     <configuration name="DashboardRaspberryBackend" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/DashboardRaspberryBackend.csproj" />

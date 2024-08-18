@@ -1,5 +1,5 @@
 using DashboardRaspberryBackend.Messaging;
-using DashboardRaspberryBackend.Messaging.Models;
+using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.ServiceConfiguration.SettingModels;
 using DashboardRaspberryBackend.Services;
 
@@ -15,16 +15,17 @@ public static class RabbitMqConfiguration
         configuration.GetSection("RabbitMqSettings").Bind(rabbitMqSettings);
         
         services.AddSingleton(rabbitMqSettings);
-        services.AddSingleton<RabbitMqProducer>(sp =>
+        services.AddSingleton<IRabbitMqProducer, RabbitMqProducer>(sp =>
         {
             var settings = sp.GetRequiredService<RabbitMqSettings>();
             return new RabbitMqProducer(settings.HostName, settings.RequestQueues);
         });
         
-        services.AddSingleton<RabbitMqConsumer<TemperatureResponse>>(sp =>
+        services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>(sp =>
         {
             var settings = sp.GetRequiredService<RabbitMqSettings>();
-            return new RabbitMqConsumer<TemperatureResponse>(settings.HostName, settings.ResponseQueues);
+            var rabbitMqResponseFactory = new RabbitMqResponseFactory();
+            return new RabbitMqConsumer(settings.HostName, settings.ResponseQueues, rabbitMqResponseFactory);
         });
         
         services.AddScoped<TemperatureService>();

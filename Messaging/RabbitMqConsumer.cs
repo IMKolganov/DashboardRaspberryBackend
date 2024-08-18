@@ -1,21 +1,26 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
+using DashboardRaspberryBackend.Messaging.Interfaces;
+using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace DashboardRaspberryBackend.Messaging;
 
-public class RabbitMqConsumer<T> : IDisposable
+public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<T>> _pendingRequests = new();
-    public RabbitMqConsumer(string hostname, List<string> queueNames)
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>> _pendingRequests = new();
+    private readonly IRabbitMqResponseFactory _rabbitMqResponseFactory;
+    
+    public RabbitMqConsumer(string hostname, List<string> queueNames, IRabbitMqResponseFactory rabbitMqResponseFactory)
     {
         var factory = new ConnectionFactory() { HostName = hostname };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
+        _rabbitMqResponseFactory = rabbitMqResponseFactory;
         
         // Declare and consume all queues
         foreach (var queueName in queueNames)
@@ -35,14 +40,17 @@ public class RabbitMqConsumer<T> : IDisposable
         }
     }
 
-    public async Task<T> GetMessageAsync(string correlationId, TimeSpan timeout)
+    public async Task<IRabbitMqResponse> GetMessageAsync(string correlationId,
+        TimeSpan timeout)
     {
-        var tcs = new TaskCompletionSource<T>();
+        // Создайте TaskCompletionSource для типа IRabbitMqResponse
+        var tcs = new TaskCompletionSource<IRabbitMqResponse>();
         _pendingRequests[correlationId] = tcs;
 
         Console.WriteLine($"Request with CorrelationId {correlationId} registered.");
-        
-        var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(T));
+
+        // Создайте задачу таймаута
+        var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(IRabbitMqResponse));
         var completedTask = await Task.WhenAny(tcs.Task, timeoutTask);
 
         _pendingRequests.TryRemove(correlationId, out _);
@@ -65,7 +73,8 @@ public class RabbitMqConsumer<T> : IDisposable
             try
             {
                 // Deserialize the message and complete the task
-                var response = JsonConvert.DeserializeObject<T>(message);
+                var response = _rabbitMqResponseFactory.CreateModel(message,
+                    ea.RoutingKey);//todo: need fix
                 tcs.TrySetResult(response);
                 Console.WriteLine(
                     $"Response received and deserialized for CorrelationId: {ea.BasicProperties.CorrelationId}");

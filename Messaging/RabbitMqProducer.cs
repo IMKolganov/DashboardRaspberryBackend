@@ -1,10 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
+using DashboardRaspberryBackend.Messaging.Interfaces;
 using RabbitMQ.Client;
 
 namespace DashboardRaspberryBackend.Messaging;
 
-public class RabbitMqProducer : IDisposable
+public class RabbitMqProducer : IRabbitMqProducer, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
