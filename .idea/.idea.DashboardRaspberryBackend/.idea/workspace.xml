@@ -9,18 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="36a326c0-7a1a-4b5f-a780-1d9eb84627f8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ServiceConfiguration/SettingModels/RabbitMqSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Models/TemperatureRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/TemperatureRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Middleware/Extensions/GlobalExceptionHandlerMiddlewareExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Middleware/Extensions/GlobalExceptionHandlerMiddlewareExtensions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/TemperatureService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/TemperatureService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.Development.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/appsettings.Docker.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.Docker.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +42,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    ".NET Launch Settings Profile.DashboardRaspberryBackend.executor": "Run",
+    ".NET Launch Settings Profile.DashboardRaspberryBackend.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "node.js.detected.package.eslint": "true",
@@ -116,7 +107,7 @@
       <updated>1721468285332</updated>
       <workItem from="1721468286658" duration="2263000" />
       <workItem from="1723400394858" duration="6764000" />
-      <workItem from="1723811588292" duration="32692000" />
+      <workItem from="1723811588292" duration="35732000" />
     </task>
     <servers />
   </component>

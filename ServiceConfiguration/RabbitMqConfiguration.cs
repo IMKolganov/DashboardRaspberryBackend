@@ -24,7 +24,7 @@ public static class RabbitMqConfiguration
         services.AddSingleton<RabbitMqConsumer<TemperatureResponse>>(sp =>
         {
             var settings = sp.GetRequiredService<RabbitMqSettings>();
-            return new RabbitMqConsumer<TemperatureResponse>(settings.HostName, settings.RequestQueues);
+            return new RabbitMqConsumer<TemperatureResponse>(settings.HostName, settings.ResponseQueues);
         });
         
         services.AddScoped<TemperatureService>();
