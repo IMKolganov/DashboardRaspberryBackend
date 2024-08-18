@@ -24,7 +24,6 @@
     <None Remove="Middleware\Extensions\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\" />
     <Folder Include="Middleware\" />
     <Folder Include="Middleware\Extensions\" />
   </ItemGroup>

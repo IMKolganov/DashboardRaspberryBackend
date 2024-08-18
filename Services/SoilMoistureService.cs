@@ -4,26 +4,26 @@ using DashboardRaspberryBackend.Services.Interfaces;
 
 namespace DashboardRaspberryBackend.Services;
 
-public class TemperatureService : ITemperatureService
+public class SoilMoistureService : ISoilMoistureService
 {
     private readonly IRabbitMqProducer _rabbitMqProducer;
     private readonly IRabbitMqConsumer _rabbitMqConsumer;
-    private readonly ILogger<TemperatureService> _logger;
+    private readonly ILogger<SoilMoistureService> _logger;
 
-    public TemperatureService(IRabbitMqProducer rabbitMqProducer, IRabbitMqConsumer rabbitMqConsumer,
-        ILogger<TemperatureService> logger)
+    public SoilMoistureService(IRabbitMqProducer rabbitMqProducer, IRabbitMqConsumer rabbitMqConsumer,
+        ILogger<SoilMoistureService> logger)
     {
         _rabbitMqProducer = rabbitMqProducer;
         _rabbitMqConsumer = rabbitMqConsumer;
         _logger = logger;
     }
 
-    public async Task<TemperatureResponse> GetTemperatureAndHumidifyData()
+    public async Task<SoilMoistureResponse> GetSoilMoistureData()
     {
         var requestId = Guid.NewGuid().ToString();
-        var request = new TemperatureRequest
+        var request = new SoilMoistureRequest
         {
-            MethodName = "get-temperature-and-humidify",
+            MethodName = "get-soil-moisture",
             IsRandom = true
         };
 
@@ -31,27 +31,27 @@ public class TemperatureService : ITemperatureService
         {
             var props = _rabbitMqProducer.CreateBasicProperties();
             props.CorrelationId = requestId;
-            props.ReplyTo = "temperatureResponseQueue";
+            props.ReplyTo = "soilMoistureResponseQueue";
             // Send message in queue
-            _rabbitMqProducer.SendMessage(request, "temperatureRequestQueue", props);
-            _logger.LogInformation("Message sent to temperatureRequestQueue with " +
+            _rabbitMqProducer.SendMessage(request, "soilMoistureRequestQueue", props);
+            _logger.LogInformation("Message sent to soilMoistureRequestQueue with " +
                                    "RequestId: {RequestId}", requestId);
             
             Console.WriteLine(requestId);
-            var response = (TemperatureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId, 
+            var response = (SoilMoistureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId, 
                 new TimeSpan(0, 0, 5));
-            _logger.LogInformation("Received response from temperatureResponseQueue for " +
+            _logger.LogInformation("Received response from soilMoistureResponseQueue for " +
                                    "RequestId: {RequestId}", requestId);
             return response;
         }
         catch (TimeoutException ex)
         {
-            _logger.LogError(ex, "Timeout occurred while waiting for temperature and humidity data.");
+            _logger.LogError(ex, "Timeout occurred while waiting for soil moisture data.");
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while getting temperature and humidity data.");
+            _logger.LogError(ex, "Error occurred while getting soil moisture data.");
             throw;
         }
     }

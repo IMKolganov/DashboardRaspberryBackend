@@ -2,6 +2,7 @@ using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.ServiceConfiguration.SettingModels;
 using DashboardRaspberryBackend.Services;
+using DashboardRaspberryBackend.Services.Interfaces;
 
 namespace DashboardRaspberryBackend.ServiceConfiguration;
 
@@ -28,7 +29,8 @@ public static class RabbitMqConfiguration
             return new RabbitMqConsumer(settings.HostName, settings.ResponseQueues, rabbitMqResponseFactory);
         });
         
-        services.AddScoped<TemperatureService>();
+        services.AddScoped<ITemperatureService, TemperatureService>();
+        services.AddScoped<ISoilMoistureService, SoilMoistureService>();
     }
 
     public static void AddHttpClientsForRabbitMq(this IServiceCollection services,

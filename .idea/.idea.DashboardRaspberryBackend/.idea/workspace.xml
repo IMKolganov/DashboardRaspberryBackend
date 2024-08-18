@@ -9,19 +9,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="36a326c0-7a1a-4b5f-a780-1d9eb84627f8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqConsumer.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqProducer.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqResponceFactory.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Messaging/Models/Interfaces/IRabbitMqResponse.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Messaging/Models/SoilMoistureResponse.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Messaging/RabbitMqResponseFactory.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Models/SoilMoistureRequest.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/Interfaces/ISoilMoistureService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/Interfaces/ITemperatureService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/SoilMoistureService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Controllers/ApiController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/ApiController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Models/TemperatureResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/TemperatureResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DashboardRaspberryBackend.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/DashboardRaspberryBackend.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqResponseFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqResponseFactory.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Services/TemperatureService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/TemperatureService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.Development.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appsettings.Docker.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.Docker.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
