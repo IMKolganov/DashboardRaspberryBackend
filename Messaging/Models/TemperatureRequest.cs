@@ -1,7 +1,8 @@
 ﻿namespace DashboardRaspberryBackend.Messaging.Models;
 
 public class TemperatureRequest
-{
-    public string RequestId { get; set; }
-    public string Url { get; set; }
+{ 
+    public string MethodName { get; set; }
+    public bool IsRandom { get; set; }
+
 }

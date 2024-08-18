@@ -1,6 +1,6 @@
 using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Models;
-using DashboardRaspberryBackend.Messaging.Storages;
+using DashboardRaspberryBackend.ServiceConfiguration.SettingModels;
 using DashboardRaspberryBackend.Services;
 
 namespace DashboardRaspberryBackend.ServiceConfiguration;
@@ -10,22 +10,21 @@ public static class RabbitMqConfiguration
     public static void AddRabbitMqServices(this IServiceCollection services, 
         IConfiguration configuration)
     {
-        // services.AddSingleton<RequestStorage>();
+        // services.AddSingleton<RequestStorage>();//todo: please looking for todo in RabbitMqConsumer
+        var rabbitMqSettings = new RabbitMqSettings();
+        configuration.GetSection("RabbitMqSettings").Bind(rabbitMqSettings);
         
+        services.AddSingleton(rabbitMqSettings);
         services.AddSingleton<RabbitMqProducer>(sp =>
         {
-            var requestQueueNames = configuration.GetSection(
-                "RabbitMqSettings:RequestQueues").Get<List<string>>();
-            return new RabbitMqProducer(requestQueueNames);
+            var settings = sp.GetRequiredService<RabbitMqSettings>();
+            return new RabbitMqProducer(settings.HostName, settings.RequestQueues);
         });
         
         services.AddSingleton<RabbitMqConsumer<TemperatureResponse>>(sp =>
         {
-            var responseQueueNames = configuration.GetSection(
-                "RabbitMqSettings:ResponseQueues").Get<List<string>>();
-            // var requestStorage = sp.GetRequiredService<RequestStorage>();
-            // return new RabbitMqConsumer<TemperatureResponse>(requestStorage, responseQueueNames);
-            return new RabbitMqConsumer<TemperatureResponse>(responseQueueNames);
+            var settings = sp.GetRequiredService<RabbitMqSettings>();
+            return new RabbitMqConsumer<TemperatureResponse>(settings.HostName, settings.RequestQueues);
         });
         
         services.AddScoped<TemperatureService>();

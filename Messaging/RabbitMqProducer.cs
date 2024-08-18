@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 
@@ -9,17 +8,14 @@ public class RabbitMqProducer : IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
-    private readonly List<string> _queueNames;
-
-    public RabbitMqProducer(List<string> queueNames)
+    public RabbitMqProducer(string hostname, List<string> queueNames)
     {
-        var factory = new ConnectionFactory() { HostName = "localhost" };
+        var factory = new ConnectionFactory() { HostName = hostname };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
-        _queueNames = queueNames ?? new List<string>();
-
+        
         // Declare all queues to ensure they exist
-        foreach (var queueName in _queueNames)
+        foreach (var queueName in queueNames)
         {
             _channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false,
                 arguments: null);

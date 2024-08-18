@@ -1,8 +1,5 @@
 ﻿using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Models;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace DashboardRaspberryBackend.Services;
 
@@ -25,7 +22,8 @@ public class TemperatureService
         var requestId = Guid.NewGuid().ToString();
         var request = new TemperatureRequest
         {
-            Url = "/get-temperature-and-humidify?isDev=1"
+            MethodName = "get-temperature-and-humidify",
+            IsRandom = true
         };
 
         try

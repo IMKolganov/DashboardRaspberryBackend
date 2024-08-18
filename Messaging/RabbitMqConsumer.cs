@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -14,17 +11,14 @@ public class RabbitMqConsumer<T> : IDisposable
     private readonly IConnection _connection;
     private readonly IModel _channel;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<T>> _pendingRequests = new();
-    private readonly List<string> _queueNames;
-
-    public RabbitMqConsumer(List<string> queueNames)
+    public RabbitMqConsumer(string hostname, List<string> queueNames)
     {
-        var factory = new ConnectionFactory() { HostName = "localhost" };
+        var factory = new ConnectionFactory() { HostName = hostname };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
-        _queueNames = queueNames ?? new List<string>();
-
+        
         // Declare and consume all queues
-        foreach (var queueName in _queueNames)
+        foreach (var queueName in queueNames)
         {
             _channel.QueueDeclare(queue: queueName,
                 durable: false,
