@@ -14,7 +14,7 @@ public class RabbitMqResponseFactory : IRabbitMqResponseFactory
         _modelCreators = new Dictionary<string, Func<string, IRabbitMqResponse>>
         {
             { "temperatureResponseQueue", json => JsonConvert.DeserializeObject<TemperatureResponse>(json) },
-            { "soilMoistureResponseQueue", json => JsonConvert.DeserializeObject<SoilMoistureResponse>(json) },
+            { "msgetsoilmoisture.to.backend.response", json => JsonConvert.DeserializeObject<SoilMoistureResponse>(json) },
         };
     }
     

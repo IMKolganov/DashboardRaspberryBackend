@@ -43,13 +43,11 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
     public async Task<IRabbitMqResponse> GetMessageAsync(string correlationId,
         TimeSpan timeout)
     {
-        // Создайте TaskCompletionSource для типа IRabbitMqResponse
         var tcs = new TaskCompletionSource<IRabbitMqResponse>();
         _pendingRequests[correlationId] = tcs;
 
         Console.WriteLine($"Request with CorrelationId {correlationId} registered.");
 
-        // Создайте задачу таймаута
         var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(IRabbitMqResponse));
         var completedTask = await Task.WhenAny(tcs.Task, timeoutTask);
 
@@ -98,7 +96,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
                 $"Warning: Received message with unexpected CorrelationId: {ea.BasicProperties.CorrelationId}");
 
             // Optionally reject the message so it can be requeued or discarded
-            _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
+            _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
             Console.WriteLine($"BasicNack requeue: true for CorrelationId: {ea.BasicProperties.CorrelationId}");
         }
     }

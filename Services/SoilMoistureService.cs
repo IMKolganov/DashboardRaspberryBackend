@@ -18,30 +18,33 @@ public class SoilMoistureService : ISoilMoistureService
         _logger = logger;
     }
 
-    public async Task<SoilMoistureResponse> GetSoilMoistureData()
+    public async Task<SoilMoistureResponse> GetSoilMoistureData(int sensorId = 0, bool withoutMSMicrocontrollerManager = false)
     {
-        var requestId = Guid.NewGuid().ToString();
+        var requestId = Guid.NewGuid();
         var request = new SoilMoistureRequest
         {
+            RequestId = requestId,
             MethodName = "get-soil-moisture",
-            IsRandom = true
+            SensorId = sensorId,
+            WithoutMSMicrocontrollerManager = withoutMSMicrocontrollerManager,
+            CreateDate = DateTime.UtcNow,
         };
 
         try
         {
             var props = _rabbitMqProducer.CreateBasicProperties();
-            props.CorrelationId = requestId;
-            props.ReplyTo = "soilMoistureResponseQueue";
+            props.CorrelationId = requestId.ToString();
+            props.ReplyTo = "msgetsoilmoisture.to.backend.response";
             // Send message in queue
-            _rabbitMqProducer.SendMessage(request, "soilMoistureRequestQueue", props);
-            _logger.LogInformation("Message sent to soilMoistureRequestQueue with " +
-                                   "RequestId: {RequestId}", requestId);
+            _rabbitMqProducer.SendMessage(request, "backend.to.msgetsoilmoisture.request", props);
+            _logger.LogInformation("Message sent to backend.to.msgetsoilmoisture.request with " +
+                                   "RequestId: {RequestId}", requestId);//todo: get from settings queue name
             
             Console.WriteLine(requestId);
-            var response = (SoilMoistureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId, 
-                new TimeSpan(0, 0, 5));
-            _logger.LogInformation("Received response from soilMoistureResponseQueue for " +
-                                   "RequestId: {RequestId}", requestId);
+            var response = (SoilMoistureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), 
+                new TimeSpan(0, 0, 10));
+            _logger.LogInformation("Received response from msgetsoilmoisture.to.backend.response for " +
+                                   "RequestId: {RequestId}", requestId);//todo: get from ???
             return response;
         }
         catch (TimeoutException ex)

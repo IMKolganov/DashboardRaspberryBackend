@@ -27,9 +27,9 @@ public class ApiController : BaseApiController
     }
     
     [HttpGet("GetSoilMoisture")]
-    public async Task<IActionResult> GetSoilMoisture()
+    public async Task<IActionResult> GetSoilMoisture(int sensorId = 0, bool withoutMSMicrocontrollerManager = false)
     {
-        var data = await _soilMoistureService.GetSoilMoistureData();
+        var data = await _soilMoistureService.GetSoilMoistureData(sensorId, withoutMSMicrocontrollerManager);
         return Ok(data);
     }
 }
