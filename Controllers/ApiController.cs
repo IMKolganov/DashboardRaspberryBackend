@@ -20,9 +20,9 @@ public class ApiController : BaseApiController
     }
 
     [HttpGet("GetTemperatureAndHumidify")]
-    public async Task<IActionResult> GetTemperatureAndHumidify()
+    public async Task<IActionResult> GetTemperatureAndHumidify(bool withoutMSMicrocontrollerManager = false)
     {
-        var data = await _temperatureService.GetTemperatureAndHumidifyData();
+        var data = await _temperatureService.GetTemperatureAndHumidifyData(withoutMSMicrocontrollerManager);
         return Ok(data);
     }
     

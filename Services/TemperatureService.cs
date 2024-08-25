@@ -18,29 +18,31 @@ public class TemperatureService : ITemperatureService
         _logger = logger;
     }
 
-    public async Task<TemperatureResponse> GetTemperatureAndHumidifyData()
+    public async Task<TemperatureResponse> GetTemperatureAndHumidifyData(bool withoutMSMicrocontrollerManager = false)
     {
-        var requestId = Guid.NewGuid().ToString();
+        var requestId = Guid.NewGuid();
         var request = new TemperatureRequest
         {
+            RequestId = requestId,
             MethodName = "get-temperature-and-humidify",
-            IsRandom = true
+            WithoutMSMicrocontrollerManager = withoutMSMicrocontrollerManager,
+            CreateDate = DateTime.UtcNow,
         };
 
         try
         {
             var props = _rabbitMqProducer.CreateBasicProperties();
-            props.CorrelationId = requestId;
-            props.ReplyTo = "temperatureResponseQueue";
+            props.CorrelationId = requestId.ToString();
+            props.ReplyTo = "msgettemperatureandhumidify.to.backend.response";
             // Send message in queue
-            _rabbitMqProducer.SendMessage(request, "temperatureRequestQueue", props);
-            _logger.LogInformation("Message sent to temperatureRequestQueue with " +
+            _rabbitMqProducer.SendMessage(request, "backend.to.msgettemperatureandhumidify.request", props);
+            _logger.LogInformation("Message sent to backend.to.msgettemperatureandhumidify.request with " +
                                    "RequestId: {RequestId}", requestId);
             
             Console.WriteLine(requestId);
-            var response = (TemperatureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId, 
+            var response = (TemperatureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), 
                 new TimeSpan(0, 0, 5));
-            _logger.LogInformation("Received response from temperatureResponseQueue for " +
+            _logger.LogInformation("Received response from msgettemperatureandhumidify.to.backend.response for " +
                                    "RequestId: {RequestId}", requestId);
             return response;
         }
