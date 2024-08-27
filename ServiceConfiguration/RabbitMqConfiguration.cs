@@ -16,14 +16,12 @@ public static class RabbitMqConfiguration
         // services.AddSingleton<RequestStorage>();//todo: please looking for todo in RabbitMqConsumer
         var rabbitMqSettings = new RabbitMqSettings();
         configuration.GetSection("RabbitMqSettings").Bind(rabbitMqSettings);
-
-        var taskCompletionSources = new ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>>();
         
         services.AddSingleton(rabbitMqSettings);
         services.AddSingleton<IRabbitMqProducer, RabbitMqProducer>(sp =>
         {
             var settings = sp.GetRequiredService<RabbitMqSettings>();
-            return new RabbitMqProducer(settings.HostName, settings.RequestQueues, taskCompletionSources);
+            return new RabbitMqProducer(settings.HostName, settings.RequestQueues);
         });
         
         services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>(sp =>
@@ -32,7 +30,7 @@ public static class RabbitMqConfiguration
             var rabbitMqResponseFactory = new RabbitMqResponseFactory();
             var logger = sp.GetRequiredService<ILogger<RabbitMqConsumer>>();
             return new RabbitMqConsumer(settings.HostName, settings.ResponseQueues,
-                rabbitMqResponseFactory, logger, taskCompletionSources);
+                rabbitMqResponseFactory, logger);
         });
         
         services.AddScoped<ITemperatureService, TemperatureService>();

@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models.Interfaces;
+using DashboardRaspberryBackend.Messaging.Synchronization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -13,21 +14,20 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>> _pendingRequests;
+    private readonly ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IRabbitMqResponse>> _pendingRequests;
     private readonly ConcurrentDictionary<string, ManualResetEventSlim> _awaitedMessages;
     private readonly IRabbitMqResponseFactory _rabbitMqResponseFactory;
     private readonly ILogger<RabbitMqConsumer> _logger;
 
     public RabbitMqConsumer(string hostname, List<string> queueNames, 
-        IRabbitMqResponseFactory rabbitMqResponseFactory, ILogger<RabbitMqConsumer> logger,
-        ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>> pendingRequests)
+        IRabbitMqResponseFactory rabbitMqResponseFactory, ILogger<RabbitMqConsumer> logger)
     {
         var factory = new ConnectionFactory() { HostName = hostname };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
         _rabbitMqResponseFactory = rabbitMqResponseFactory;
         _logger = logger;
-        _pendingRequests = pendingRequests;
+        _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IRabbitMqResponse>>();
         _awaitedMessages = new ConcurrentDictionary<string, ManualResetEventSlim>();
 
         foreach (var queueName in queueNames)
@@ -54,7 +54,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
 
     public async Task<IRabbitMqResponse> GetMessageAsync(string correlationId, TimeSpan timeout)
     {
-        var tcs = new TaskCompletionSource<IRabbitMqResponse>();
+        var tcs = new TaskCompletionSourceWithStatus<IRabbitMqResponse>();
         _pendingRequests[correlationId] = tcs;
 
         _logger.LogInformation("Request with CorrelationId {correlationId} registered.", correlationId);

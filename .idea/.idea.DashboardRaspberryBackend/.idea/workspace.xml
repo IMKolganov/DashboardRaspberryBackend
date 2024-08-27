@@ -9,22 +9,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="36a326c0-7a1a-4b5f-a780-1d9eb84627f8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Messaging/Synchronization/MessageStatus.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Messaging/Synchronization/TaskCompletionSourceWithStatus.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DashboardRaspberryBackend/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqConsumer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqConsumer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqProducer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Interfaces/IRabbitMqProducer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Models/RequestState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/RequestState.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Models/SoilMoistureRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/SoilMoistureRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Models/SoilMoistureResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/SoilMoistureResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Models/TemperatureRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/TemperatureRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Models/TemperatureResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Models/TemperatureResponse.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqConsumer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqProducer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/RabbitMqResponseFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/RabbitMqResponseFactory.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Messaging/Storages/RequestStorage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Messaging/Storages/RequestStorage.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ServiceConfiguration/RabbitMqConfiguration.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServiceConfiguration/SettingModels/RabbitMqSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ServiceConfiguration/SettingModels/RabbitMqSettings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/SoilMoistureService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/SoilMoistureService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/TemperatureService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/TemperatureService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,27 +52,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.DashboardRaspberryBackend.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.DashboardRaspberryBackend.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "feature/fix__race__condition__with__rabbitmq",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;rider.external.source.directories&quot;: [
-      &quot;/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache&quot;,
-      &quot;/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache&quot;,
-      &quot;/Users/rackot/Library/Application Support/Symbols/src&quot;
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache",
+      "/Users/rackot/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache",
+      "/Users/rackot/Library/Application Support/Symbols/src"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.DashboardRaspberryBackend">
     <configuration name="DashboardRaspberryBackend" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/DashboardRaspberryBackend.csproj" />

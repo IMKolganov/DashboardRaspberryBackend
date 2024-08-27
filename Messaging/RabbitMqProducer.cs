@@ -11,16 +11,13 @@ public class RabbitMqProducer : IRabbitMqProducer, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>> _pendingRequests;
     
-    public RabbitMqProducer(string hostname, List<string> queueNames,
-        ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>> pendingRequests)
+    public RabbitMqProducer(string hostname, List<string> queueNames)
     {
         var factory = new ConnectionFactory() { HostName = hostname };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
-        _pendingRequests = pendingRequests;
-
+        
         foreach (var queueName in queueNames)
         {
             _channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false,
