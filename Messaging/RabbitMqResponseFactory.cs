@@ -13,8 +13,8 @@ public class RabbitMqResponseFactory : IRabbitMqResponseFactory
     {
         _modelCreators = new Dictionary<string, Func<string, IRabbitMqResponse>>
         {
-            { "msgettemperatureandhumidify.to.backend.response", json => JsonConvert.DeserializeObject<TemperatureResponse>(json) },
-            { "msgetsoilmoisture.to.backend.response", json => JsonConvert.DeserializeObject<SoilMoistureResponse>(json) },
+            { "msgettemperatureandhumidify.to.backend.response", json => JsonConvert.DeserializeObject<TemperatureResponse>(json) ?? throw new InvalidOperationException() },
+            { "msgetsoilmoisture.to.backend.response", json => JsonConvert.DeserializeObject<SoilMoistureResponse>(json) ?? throw new InvalidOperationException() },
         };
     }
     

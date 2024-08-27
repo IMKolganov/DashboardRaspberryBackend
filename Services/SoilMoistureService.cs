@@ -1,6 +1,7 @@
 ﻿using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models;
 using DashboardRaspberryBackend.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace DashboardRaspberryBackend.Services;
 
@@ -21,6 +22,7 @@ public class SoilMoistureService : ISoilMoistureService
     public async Task<SoilMoistureResponse> GetSoilMoistureData(int sensorId = 0, bool withoutMSMicrocontrollerManager = false)
     {
         var requestId = Guid.NewGuid();
+        _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
         var request = new SoilMoistureRequest
         {
             RequestId = requestId,
@@ -36,15 +38,16 @@ public class SoilMoistureService : ISoilMoistureService
             props.CorrelationId = requestId.ToString();
             props.ReplyTo = "msgetsoilmoisture.to.backend.response";
             // Send message in queue
-            _rabbitMqProducer.SendMessage(request, "backend.to.msgetsoilmoisture.request", props);
+            var timeout = new TimeSpan(0, 0, 30);
+            _rabbitMqProducer.SendMessage(request, "backend.to.msgetsoilmoisture.request", 
+                props);
             _logger.LogInformation("Message sent to backend.to.msgetsoilmoisture.request with " +
-                                   "RequestId: {RequestId}", requestId);//todo: get from settings queue name
+                                   "RequestId: {RequestId} , Request: {request}", requestId, request);
             
-            Console.WriteLine(requestId);
-            var response = (SoilMoistureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), 
-                new TimeSpan(0, 0, 10));
+            var response = (SoilMoistureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
             _logger.LogInformation("Received response from msgetsoilmoisture.to.backend.response for " +
-                                   "RequestId: {RequestId}", requestId);//todo: get from ???
+                                   "RequestId: {RequestId} , Response: {response}", 
+                requestId,  JsonConvert.SerializeObject(response));
             return response;
         }
         catch (TimeoutException ex)

@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Interfaces;
+using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using DashboardRaspberryBackend.ServiceConfiguration.SettingModels;
 using DashboardRaspberryBackend.Services;
 using DashboardRaspberryBackend.Services.Interfaces;
@@ -14,19 +16,23 @@ public static class RabbitMqConfiguration
         // services.AddSingleton<RequestStorage>();//todo: please looking for todo in RabbitMqConsumer
         var rabbitMqSettings = new RabbitMqSettings();
         configuration.GetSection("RabbitMqSettings").Bind(rabbitMqSettings);
+
+        var taskCompletionSources = new ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>>();
         
         services.AddSingleton(rabbitMqSettings);
         services.AddSingleton<IRabbitMqProducer, RabbitMqProducer>(sp =>
         {
             var settings = sp.GetRequiredService<RabbitMqSettings>();
-            return new RabbitMqProducer(settings.HostName, settings.RequestQueues);
+            return new RabbitMqProducer(settings.HostName, settings.RequestQueues, taskCompletionSources);
         });
         
         services.AddSingleton<IRabbitMqConsumer, RabbitMqConsumer>(sp =>
         {
             var settings = sp.GetRequiredService<RabbitMqSettings>();
             var rabbitMqResponseFactory = new RabbitMqResponseFactory();
-            return new RabbitMqConsumer(settings.HostName, settings.ResponseQueues, rabbitMqResponseFactory);
+            var logger = sp.GetRequiredService<ILogger<RabbitMqConsumer>>();
+            return new RabbitMqConsumer(settings.HostName, settings.ResponseQueues,
+                rabbitMqResponseFactory, logger, taskCompletionSources);
         });
         
         services.AddScoped<ITemperatureService, TemperatureService>();
