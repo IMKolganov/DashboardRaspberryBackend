@@ -18,10 +18,13 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
     private readonly ConcurrentDictionary<string, ManualResetEventSlim> _awaitedMessages;
     private readonly IRabbitMqResponseFactory _rabbitMqResponseFactory;
     private readonly ILogger<RabbitMqConsumer> _logger;
+    private readonly int _timeoutSeconds;
+    private const int CheckIntervalMilliseconds = 200;
 
-    public RabbitMqConsumer(string hostname, List<string> queueNames, 
+    public RabbitMqConsumer(string hostname, int timeoutSeconds, List<string> queueNames, 
         IRabbitMqResponseFactory rabbitMqResponseFactory, ILogger<RabbitMqConsumer> logger)
     {
+        _timeoutSeconds = timeoutSeconds;
         var factory = new ConnectionFactory() { HostName = hostname };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
@@ -65,13 +68,11 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
             
             if (completedTask == tcs.Task)
             {
-                // Successfully received response
-                return await tcs.Task;
-            }
-            else
-            {
-                // Timeout occurred
+                return await tcs.Task; // Successfully received response
+            }else {
                 _pendingRequests.TryRemove(correlationId, out _);
+                tcs.TrySetCanceled();
+                _awaitedMessages.TryRemove(correlationId, out _);
                 throw new TimeoutException($"The request with correlationId {correlationId} timed out.");
             }
         }
@@ -82,71 +83,43 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         var correlationId = ea.BasicProperties.CorrelationId;
         var body = ea.Body.ToArray();
         var message = Encoding.UTF8.GetString(body);
-        var messageFound = false;
+        var stopwatch = Stopwatch.StartNew();
 
-        if (_pendingRequests.TryRemove(correlationId, out var tcs))
+        while (stopwatch.Elapsed < TimeSpan.FromSeconds(_timeoutSeconds))
         {
-            messageFound = TryToGetMessageFromQueue(tcs, correlationId, message, ea);
-        } else {
-            var checkInterval = TimeSpan.FromMilliseconds(500);  // Интервал между проверками
-            var timeout = TimeSpan.FromSeconds(5);               // Общий таймаут ожидания
-            var stopwatch = Stopwatch.StartNew();
-
-            while (stopwatch.Elapsed < timeout)
+            if (_awaitedMessages.TryGetValue(correlationId, out var awaitEvent))
             {
-                if (_awaitedMessages.TryGetValue(correlationId, out var awaitEvent))
+                if (_pendingRequests.TryRemove(correlationId, out var tcs2))
                 {
-                    var b = _pendingRequests.TryGetValue(correlationId, 
-                        out var value);
-                    if (_pendingRequests.TryRemove(correlationId, out var tcs2))
+                    if (TryToGetMessageFromQueue(tcs2, correlationId, message, ea))
                     {
-                        _logger.LogError("Сообщение найдено, но его нет " +
-                                         " b {b} " +
-                                         "в _pendingRequests {_pendingRequests}", 
-                            b, _pendingRequests);
-                        messageFound = TryToGetMessageFromQueue(tcs2, correlationId, message, ea); ;
+                        _logger.LogInformation("Message processed for CorrelationId {correlationId}", correlationId);
+                        _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                         awaitEvent.Set();
-                        break;
+                        return;
                     }
                 }
-                Task.Delay(checkInterval);  // Ждем перед следующей проверкой
             }
-        }
-        
-        if (!messageFound)
-        {
-            _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
-            _logger.LogWarning("Unexpected message with CorrelationId {CorrelationId}", correlationId);
+            Task.Delay(TimeSpan.FromMilliseconds(CheckIntervalMilliseconds)).Wait();
         }
 
+        _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
+        _logger.LogWarning("Unexpected message with CorrelationId {CorrelationId}", correlationId);
     }
 
-    private bool TryToGetMessageFromQueue(TaskCompletionSource<IRabbitMqResponse>? tcs,
+    private bool TryToGetMessageFromQueue(TaskCompletionSourceWithStatus<IRabbitMqResponse> tcs,
         string correlationId, string message, BasicDeliverEventArgs ea)
     {
-        try
-        {
+        try {
             var response = _rabbitMqResponseFactory.CreateModel(message, ea.RoutingKey);
-            _logger.LogInformation("Response received and deserialized for CorrelationId: {CorrelationId} , " +
-                                   "Response: {response}", correlationId, response);
-            _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-            _logger.LogInformation("BasicAck Manually {DeliveryTag}", ea.DeliveryTag);
+            _logger.LogInformation("Response received and deserialized for CorrelationId: {CorrelationId}, Response: {response}", correlationId, response);
             tcs.TrySetResult(response);
             return true;
-        }
-        catch (JsonException jsonEx)
-        {
+        }catch (JsonException jsonEx) {
             tcs.TrySetException(jsonEx);
+            return false;
         }
-        // finally
-        // {
-        // _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-        // _logger.LogInformation("BasicAck Manually {DeliveryTag}", ea.DeliveryTag);
-        // }
-
-        return false;
     }
-
 
     public void Dispose()
     {

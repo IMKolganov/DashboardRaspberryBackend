@@ -29,7 +29,7 @@ public static class RabbitMqConfiguration
             var settings = sp.GetRequiredService<RabbitMqSettings>();
             var rabbitMqResponseFactory = new RabbitMqResponseFactory();
             var logger = sp.GetRequiredService<ILogger<RabbitMqConsumer>>();
-            return new RabbitMqConsumer(settings.HostName, settings.ResponseQueues,
+            return new RabbitMqConsumer(settings.HostName, settings.TimeoutSeconds, settings.ResponseQueues,
                 rabbitMqResponseFactory, logger);
         });
         
