@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using DashboardRaspberryBackend.Messaging.Models;
 
 namespace DashboardRaspberryBackend.Messaging.Storages;
 
@@ -14,6 +13,6 @@ public class RequestStorage
 
     public bool TryGetRequest(string correlationId, out TaskCompletionSource<object> tcs)
     {
-        return _requests.TryRemove(correlationId, out tcs);
+        return _requests.TryRemove(correlationId, out tcs!);
     }
 }

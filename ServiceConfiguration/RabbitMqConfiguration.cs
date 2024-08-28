@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Interfaces;
+using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using DashboardRaspberryBackend.ServiceConfiguration.SettingModels;
 using DashboardRaspberryBackend.Services;
 using DashboardRaspberryBackend.Services.Interfaces;
@@ -26,7 +28,9 @@ public static class RabbitMqConfiguration
         {
             var settings = sp.GetRequiredService<RabbitMqSettings>();
             var rabbitMqResponseFactory = new RabbitMqResponseFactory();
-            return new RabbitMqConsumer(settings.HostName, settings.ResponseQueues, rabbitMqResponseFactory);
+            var logger = sp.GetRequiredService<ILogger<RabbitMqConsumer>>();
+            return new RabbitMqConsumer(settings.HostName, settings.TimeoutSeconds, settings.ResponseQueues,
+                rabbitMqResponseFactory, logger);
         });
         
         services.AddScoped<ITemperatureService, TemperatureService>();

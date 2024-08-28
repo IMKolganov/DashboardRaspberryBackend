@@ -1,8 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models.Interfaces;
-using Newtonsoft.Json;
+using DashboardRaspberryBackend.Messaging.Synchronization;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -12,17 +14,25 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<IRabbitMqResponse>> _pendingRequests = new();
+    private readonly ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IRabbitMqResponse>> _pendingRequests;
+    private readonly ConcurrentDictionary<string, ManualResetEventSlim> _awaitedMessages;
     private readonly IRabbitMqResponseFactory _rabbitMqResponseFactory;
-    
-    public RabbitMqConsumer(string hostname, List<string> queueNames, IRabbitMqResponseFactory rabbitMqResponseFactory)
+    private readonly ILogger<RabbitMqConsumer> _logger;
+    private readonly int _timeoutSeconds;
+    private const int CheckIntervalMilliseconds = 200;
+
+    public RabbitMqConsumer(string hostname, int timeoutSeconds, List<string> queueNames, 
+        IRabbitMqResponseFactory rabbitMqResponseFactory, ILogger<RabbitMqConsumer> logger)
     {
+        _timeoutSeconds = timeoutSeconds;
         var factory = new ConnectionFactory() { HostName = hostname };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
         _rabbitMqResponseFactory = rabbitMqResponseFactory;
-        
-        // Declare and consume all queues
+        _logger = logger;
+        _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IRabbitMqResponse>>();
+        _awaitedMessages = new ConcurrentDictionary<string, ManualResetEventSlim>();
+
         foreach (var queueName in queueNames)
         {
             _channel.QueueDeclare(queue: queueName,
@@ -31,73 +41,83 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
                 autoDelete: false,
                 arguments: null);
 
-            // Initialize the consumer and attach the Received event handler
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnMessageReceived;
             var consumerTag = _channel.BasicConsume(
                 queue: queueName, autoAck: false, consumer: consumer);
-            Console.WriteLine($"Consumer started with tag: {consumerTag}");
+            _logger.LogInformation("Consumer started with tag: {consumerTag}", consumerTag);
         }
     }
-
-    public async Task<IRabbitMqResponse> GetMessageAsync(string correlationId,
-        TimeSpan timeout)
+    
+    public void RegisterAwaitedMessage(string correlationId)
     {
-        var tcs = new TaskCompletionSource<IRabbitMqResponse>();
+        var awaitEvent = new ManualResetEventSlim(false);
+        _awaitedMessages[correlationId] = awaitEvent;
+    }
+
+    public async Task<IRabbitMqResponse> GetMessageAsync(string correlationId, TimeSpan timeout)
+    {
+        var tcs = new TaskCompletionSourceWithStatus<IRabbitMqResponse>();
         _pendingRequests[correlationId] = tcs;
 
-        Console.WriteLine($"Request with CorrelationId {correlationId} registered.");
+        _logger.LogInformation("Request with CorrelationId {correlationId} registered.", correlationId);
 
-        var timeoutTask = Task.Delay(timeout).ContinueWith(_ => default(IRabbitMqResponse));
-        var completedTask = await Task.WhenAny(tcs.Task, timeoutTask);
-
-        _pendingRequests.TryRemove(correlationId, out _);
-
-        if (completedTask == timeoutTask)
+        using (var cts = new CancellationTokenSource(timeout))
         {
-            throw new TimeoutException($"The request with correlationId {correlationId} timed out.");
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, cts.Token));
+            
+            if (completedTask == tcs.Task)
+            {
+                return await tcs.Task; // Successfully received response
+            }else {
+                _pendingRequests.TryRemove(correlationId, out _);
+                tcs.TrySetCanceled();
+                _awaitedMessages.TryRemove(correlationId, out _);
+                throw new TimeoutException($"The request with correlationId {correlationId} timed out.");
+            }
         }
-
-        return await tcs.Task;
     }
 
-    private void OnMessageReceived(object model, BasicDeliverEventArgs ea)
+    private void OnMessageReceived(object? model, BasicDeliverEventArgs ea)
     {
+        var correlationId = ea.BasicProperties.CorrelationId;
         var body = ea.Body.ToArray();
         var message = Encoding.UTF8.GetString(body);
+        var stopwatch = Stopwatch.StartNew();
 
-        if (_pendingRequests.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
+        while (stopwatch.Elapsed < TimeSpan.FromSeconds(_timeoutSeconds))
         {
-            try
+            if (_awaitedMessages.TryGetValue(correlationId, out var awaitEvent))
             {
-                // Deserialize the message and complete the task
-                var response = _rabbitMqResponseFactory.CreateModel(message,
-                    ea.RoutingKey);//todo: need fix
-                tcs.TrySetResult(response);
-                Console.WriteLine(
-                    $"Response received and deserialized for CorrelationId: {ea.BasicProperties.CorrelationId}");
+                if (_pendingRequests.TryRemove(correlationId, out var tcs2))
+                {
+                    if (TryToGetMessageFromQueue(tcs2, correlationId, message, ea))
+                    {
+                        _logger.LogInformation("Message processed for CorrelationId {correlationId}", correlationId);
+                        _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                        awaitEvent.Set();
+                        return;
+                    }
+                }
             }
-            catch (JsonException jsonEx)
-            {
-                tcs.TrySetException(jsonEx);
-            }
-            finally
-            {
-                // Manually acknowledge the message after processing
-                _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                Console.WriteLine($"BasicAck Manually {ea.DeliveryTag}");
-            }
+            Task.Delay(TimeSpan.FromMilliseconds(CheckIntervalMilliseconds)).Wait();
         }
-        else
-        {
-            //todo: need use RequestState and RequestStorage...
-            // Log a warning or take action for unexpected correlation ID
-            Console.WriteLine(
-                $"Warning: Received message with unexpected CorrelationId: {ea.BasicProperties.CorrelationId}");
 
-            // Optionally reject the message so it can be requeued or discarded
-            _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
-            Console.WriteLine($"BasicNack requeue: true for CorrelationId: {ea.BasicProperties.CorrelationId}");
+        _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
+        _logger.LogWarning("Unexpected message with CorrelationId {CorrelationId}", correlationId);
+    }
+
+    private bool TryToGetMessageFromQueue(TaskCompletionSourceWithStatus<IRabbitMqResponse> tcs,
+        string correlationId, string message, BasicDeliverEventArgs ea)
+    {
+        try {
+            var response = _rabbitMqResponseFactory.CreateModel(message, ea.RoutingKey);
+            _logger.LogInformation("Response received and deserialized for CorrelationId: {CorrelationId}, Response: {response}", correlationId, response);
+            tcs.TrySetResult(response);
+            return true;
+        }catch (JsonException jsonEx) {
+            tcs.TrySetException(jsonEx);
+            return false;
         }
     }
 
