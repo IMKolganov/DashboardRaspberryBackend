@@ -19,7 +19,7 @@ public class PumpService : IPumpService
         _logger = logger;
     }
 
-    public async Task<PumpResponse> StartPum(int pumpId = 0, bool withoutMSMicrocontrollerManager = false)
+    public async Task<PumpResponse> StartPum(int pumpId = 0, int seconds = 5, bool withoutMSMicrocontrollerManager = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
@@ -28,6 +28,7 @@ public class PumpService : IPumpService
             RequestId = requestId,
             MethodName = "start-pump",
             PumpId = pumpId,
+            Seconds = seconds,
             WithoutMSMicrocontrollerManager = withoutMSMicrocontrollerManager,
             CreateDate = DateTime.UtcNow,
         };

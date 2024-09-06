@@ -35,6 +35,8 @@ public static class RabbitMqConfiguration
         
         services.AddScoped<ITemperatureService, TemperatureService>();
         services.AddScoped<ISoilMoistureService, SoilMoistureService>();
+        services.AddScoped<IPumpService, PumpService>();
+
     }
 
     public static void AddHttpClientsForRabbitMq(this IServiceCollection services,

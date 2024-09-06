@@ -93,7 +93,8 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
                 {
                     if (TryToGetMessageFromQueue(tcs2, correlationId, message, ea))
                     {
-                        _logger.LogInformation("Message processed for CorrelationId {correlationId}", correlationId);
+                        _logger.LogInformation("Message processed for CorrelationId {correlationId} , " +
+                                               "Message {message}", correlationId, message);
                         _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                         awaitEvent.Set();
                         return;
@@ -104,7 +105,8 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         }
 
         _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
-        _logger.LogWarning("Unexpected message with CorrelationId {CorrelationId}", correlationId);
+        _logger.LogWarning("Unexpected message with CorrelationId {CorrelationId} , " +
+                           "Message {message}", correlationId, message);
     }
 
     private bool TryToGetMessageFromQueue(TaskCompletionSourceWithStatus<IRabbitMqResponse> tcs,

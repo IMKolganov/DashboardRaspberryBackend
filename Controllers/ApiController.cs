@@ -9,14 +9,17 @@ public class ApiController : BaseApiController
 {
     private readonly ITemperatureService _temperatureService;
     private readonly ISoilMoistureService _soilMoistureService;
+    private readonly IPumpService _pumpService;
+
 
     public ApiController(ILogger<ApiController> logger, IHttpClientFactory httpClientFactory, 
         IConfiguration configuration, ITemperatureService temperatureService,
-        ISoilMoistureService soilMoistureService)
+        ISoilMoistureService soilMoistureService, IPumpService pumpService)
         : base(logger, httpClientFactory, configuration)
     {
         _temperatureService = temperatureService;
         _soilMoistureService = soilMoistureService;
+        _pumpService = pumpService;
     }
 
     [HttpGet("GetTemperatureAndHumidify")]
@@ -30,6 +33,13 @@ public class ApiController : BaseApiController
     public async Task<IActionResult> GetSoilMoisture(int sensorId = 0, bool withoutMSMicrocontrollerManager = false)
     {
         var data = await _soilMoistureService.GetSoilMoistureData(sensorId, withoutMSMicrocontrollerManager);
+        return Ok(data);
+    }
+    
+    [HttpPost("StartPum")]
+    public async Task<IActionResult> StartPum(int pumpId = 0, int seconds = 5, bool withoutMSMicrocontrollerManager = false)
+    {
+        var data = await _pumpService.StartPum(pumpId, seconds, withoutMSMicrocontrollerManager);
         return Ok(data);
     }
 }

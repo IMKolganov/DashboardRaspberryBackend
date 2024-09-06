@@ -15,6 +15,7 @@ public class RabbitMqResponseFactory : IRabbitMqResponseFactory
         {
             { "msgettemperatureandhumidify.to.backend.response", json => JsonConvert.DeserializeObject<TemperatureResponse>(json) ?? throw new InvalidOperationException() },
             { "msgetsoilmoisture.to.backend.response", json => JsonConvert.DeserializeObject<SoilMoistureResponse>(json) ?? throw new InvalidOperationException() },
+            { "mspumpcontrol.to.backend.response", json => JsonConvert.DeserializeObject<PumpResponse>(json) ?? throw new InvalidOperationException() },
         };
     }
     
