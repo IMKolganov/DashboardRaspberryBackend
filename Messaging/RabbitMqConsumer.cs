@@ -5,6 +5,7 @@ using System.Text.Json;
 using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using DashboardRaspberryBackend.Messaging.Synchronization;
+using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -113,7 +114,9 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         string correlationId, string message, BasicDeliverEventArgs ea)
     {
         try {
-            var response = _rabbitMqResponseFactory.CreateModel(message, ea.RoutingKey);
+            var jsonObject = JObject.Parse(message);
+            var responseType = jsonObject["ResponseType"]?.ToString();
+            var response = _rabbitMqResponseFactory.CreateModel(message, responseType);
             _logger.LogInformation("Response received and deserialized for CorrelationId: {CorrelationId}, Response: {response}", correlationId, response);
             tcs.TrySetResult(response);
             return true;
