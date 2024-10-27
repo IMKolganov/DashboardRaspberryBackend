@@ -1,5 +1,6 @@
 # Use the SDK image for building and running the app
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+USER app
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
