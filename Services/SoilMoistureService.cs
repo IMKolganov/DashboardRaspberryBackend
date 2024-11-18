@@ -19,7 +19,7 @@ public class SoilMoistureService : ISoilMoistureService
         _logger = logger;
     }
 
-    public async Task<GeneralResponse<SoilMoistureResponse>> GetSoilMoistureData(int sensorId = 0, bool withoutMSMicrocontrollerManager = false)
+    public async Task<GeneralResponse<SoilMoistureResponse>> GetSoilMoistureData(int sensorId = 0, bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
@@ -27,8 +27,8 @@ public class SoilMoistureService : ISoilMoistureService
         {
             RequestId = requestId,
             SensorId = sensorId,
-            WithoutMSMicrocontrollerManager = withoutMSMicrocontrollerManager,
-            CreateDate = DateTime.UtcNow,
+            UseRandomValuesFotTest = useRandomValuesFotTest,
+            RequestDate = DateTime.UtcNow,
         };
         
         var generalRequest = new GeneralRequest
@@ -44,7 +44,7 @@ public class SoilMoistureService : ISoilMoistureService
             props.CorrelationId = requestId.ToString();
             props.ReplyTo = "msmicrocontrollermanager.to.backend.response";
             // Send message in queue
-            var timeout = new TimeSpan(0, 0, 5);
+            var timeout = new TimeSpan(0, 0, 30);
             _rabbitMqProducer.SendMessage(generalRequest, "backend.to.msmicrocontrollermanager.request", 
                 props);
             _logger.LogInformation("Message sent to backend.to.msmicrocontrollermanager.request with " +

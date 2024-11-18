@@ -2,17 +2,16 @@
 
 namespace DashboardRaspberryBackend.Messaging.Models;
 
-public class SoilMoistureRequest : IRequest
+public class TemperatureHumidityRequest : IRequest
 {
-    public SoilMoistureRequest()
+    public TemperatureHumidityRequest()
     {
     }
-    
-    public SoilMoistureRequest(Guid requestId)
+    public TemperatureHumidityRequest(Guid requestId)
     {
         RequestId = requestId;
     }
-
+    
     public Guid RequestId { get; set; }
     public bool UseRandomValuesFotTest { get; set; }
     public DateTime RequestDate { get; set; }

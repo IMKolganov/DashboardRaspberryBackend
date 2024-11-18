@@ -114,17 +114,16 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         string correlationId, string message, BasicDeliverEventArgs ea)
     {
         try {
-            var jsonObject = JObject.Parse(message);
-            var responseType = jsonObject["ResponseType"]?.ToString();
-            var response = _rabbitMqResponseFactory.CreateModel(message, responseType);
+            var response = _rabbitMqResponseFactory.CreateModel(message);
             _logger.LogInformation("Response received and deserialized for CorrelationId: {CorrelationId}, Response: {response}", correlationId, response);
             tcs.TrySetResult(response);
             return true;
-        }catch (JsonException jsonEx) {
+        } catch (JsonException jsonEx) {
             tcs.TrySetException(jsonEx);
             return false;
         }
     }
+
 
     public void Dispose()
     {

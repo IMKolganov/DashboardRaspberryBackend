@@ -19,17 +19,17 @@ public class PumpService : IPumpService
         _logger = logger;
     }
 
-    public async Task<GeneralResponse<PumpResponse>> StartPum(int pumpId = 0, int seconds = 5, bool withoutMSMicrocontrollerManager = false)
+    public async Task<GeneralResponse<PumpSwitcherResponse>> StartPum(int pumpId = 0, int pumpDuration = 5, bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
-        var pumpRequest = new PumpRequest
+        var pumpRequest = new PumpSwitcherRequest
         {
             RequestId = requestId,
             PumpId = pumpId,
-            Seconds = seconds,
-            WithoutMsMicrocontrollerManager = withoutMSMicrocontrollerManager,
-            CreateDate = DateTime.UtcNow,
+            Duration = pumpDuration,
+            UseRandomValuesFotTest = useRandomValuesFotTest,
+            RequestDate = DateTime.UtcNow,
         };
         
         var generalRequest = new GeneralRequest
@@ -51,7 +51,7 @@ public class PumpService : IPumpService
             _logger.LogInformation("Message sent to backend.to.msmicrocontrollermanager.request with " +
                                    "RequestId: {RequestId} , Request: {generalRequest}", requestId, generalRequest);
             
-            var response = (GeneralResponse<PumpResponse>) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
+            var response = (GeneralResponse<PumpSwitcherResponse>) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
             _logger.LogInformation("Received response from msmicrocontrollermanager.to.backend.response for " +
                                    "RequestId: {RequestId} , Response: {response}", 
                 requestId,  JsonConvert.SerializeObject(response));

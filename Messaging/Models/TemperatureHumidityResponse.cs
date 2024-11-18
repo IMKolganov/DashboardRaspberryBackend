@@ -2,10 +2,11 @@
 
 namespace DashboardRaspberryBackend.Messaging.Models;
 
-public class PumpResponse: IRabbitMqResponse
+public class TemperatureHumidityResponse: IRabbitMqResponse
 {
     public Guid RequestId { get; set; }
-    public int? PumpId { get; set; }
-    public DateTime CreateDate { get; set; }
+    public double Temperature { get; set; }
+    public double Humidity { get; set; }
     public string? Message { get; set; }
+    public string Type { get; set; }
 }
