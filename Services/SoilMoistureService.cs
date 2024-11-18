@@ -19,33 +19,39 @@ public class SoilMoistureService : ISoilMoistureService
         _logger = logger;
     }
 
-    public async Task<SoilMoistureResponse> GetSoilMoistureData(int sensorId = 0, bool withoutMSMicrocontrollerManager = false)
+    public async Task<GeneralResponse<SoilMoistureResponse>> GetSoilMoistureData(int sensorId = 0, bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
-        var request = new SoilMoistureRequest
+        var soilMoistureRequest = new SoilMoistureRequest
         {
             RequestId = requestId,
-            MethodName = "get-soil-moisture",
             SensorId = sensorId,
-            WithoutMSMicrocontrollerManager = withoutMSMicrocontrollerManager,
-            CreateDate = DateTime.UtcNow,
+            UseRandomValuesFotTest = useRandomValuesFotTest,
+            RequestDate = DateTime.UtcNow,
+        };
+        
+        var generalRequest = new GeneralRequest
+        {
+            RequestId = requestId,
+            RequestType = "SoilMoisture",
+            Data = soilMoistureRequest
         };
 
         try
         {
             var props = _rabbitMqProducer.CreateBasicProperties();
             props.CorrelationId = requestId.ToString();
-            props.ReplyTo = "msgetsoilmoisture.to.backend.response";
+            props.ReplyTo = "msmicrocontrollermanager.to.backend.response";
             // Send message in queue
             var timeout = new TimeSpan(0, 0, 30);
-            _rabbitMqProducer.SendMessage(request, "backend.to.msgetsoilmoisture.request", 
+            _rabbitMqProducer.SendMessage(generalRequest, "backend.to.msmicrocontrollermanager.request", 
                 props);
-            _logger.LogInformation("Message sent to backend.to.msgetsoilmoisture.request with " +
-                                   "RequestId: {RequestId} , Request: {request}", requestId, request);
+            _logger.LogInformation("Message sent to backend.to.msmicrocontrollermanager.request with " +
+                                   "RequestId: {RequestId} , Request: {generalRequest}", requestId, generalRequest);
             
-            var response = (SoilMoistureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
-            _logger.LogInformation("Received response from msgetsoilmoisture.to.backend.response for " +
+            var response = (GeneralResponse<SoilMoistureResponse>) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
+            _logger.LogInformation("Received response from msmicrocontrollermanager.to.backend.response for " +
                                    "RequestId: {RequestId} , Response: {response}", 
                 requestId,  JsonConvert.SerializeObject(response));
             return response;

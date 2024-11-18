@@ -1,30 +1,34 @@
-using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models;
 using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DashboardRaspberryBackend.Messaging;
 
-public class RabbitMqResponseFactory : IRabbitMqResponseFactory
+public class RabbitMqResponseFactory
 {
-    private readonly IDictionary<string, Func<string, IRabbitMqResponse>> _modelCreators;
+    private readonly Dictionary<string, Type> _typeMapping;
 
     public RabbitMqResponseFactory()
     {
-        _modelCreators = new Dictionary<string, Func<string, IRabbitMqResponse>>
+        _typeMapping = new Dictionary<string, Type>
         {
-            { "msgettemperatureandhumidify.to.backend.response", json => JsonConvert.DeserializeObject<TemperatureResponse>(json) ?? throw new InvalidOperationException() },
-            { "msgetsoilmoisture.to.backend.response", json => JsonConvert.DeserializeObject<SoilMoistureResponse>(json) ?? throw new InvalidOperationException() },
+            { "TemperatureHumidityResponse", typeof(TemperatureHumidityResponse) },
+            { "SoilMoistureResponse", typeof(SoilMoistureResponse) },
+            { "PumpSwitcherResponse", typeof(PumpSwitcherResponse) }
         };
     }
-    
-    public IRabbitMqResponse CreateModel(string json, string modelType)
+
+    public IRabbitMqResponse CreateModel(string message)
     {
-        if (_modelCreators.TryGetValue(modelType, out var createModel))
+        var jsonObject = JObject.Parse(message);
+
+        var typeName = jsonObject["Type"]?.ToString();
+        if (!_typeMapping.TryGetValue(typeName, out var responseType))
         {
-            return createModel(json);
+            throw new InvalidOperationException($"Unknown type: {typeName}");
         }
 
-        throw new ArgumentException($"Model type {modelType} is not supported.", nameof(modelType));
+        return (IRabbitMqResponse)JsonConvert.DeserializeObject(message, responseType);
     }
 }

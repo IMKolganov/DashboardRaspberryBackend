@@ -5,6 +5,7 @@ using System.Text.Json;
 using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using DashboardRaspberryBackend.Messaging.Synchronization;
+using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -93,7 +94,8 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
                 {
                     if (TryToGetMessageFromQueue(tcs2, correlationId, message, ea))
                     {
-                        _logger.LogInformation("Message processed for CorrelationId {correlationId}", correlationId);
+                        _logger.LogInformation("Message processed for CorrelationId {correlationId} , " +
+                                               "Message {message}", correlationId, message);
                         _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                         awaitEvent.Set();
                         return;
@@ -104,22 +106,24 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         }
 
         _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
-        _logger.LogWarning("Unexpected message with CorrelationId {CorrelationId}", correlationId);
+        _logger.LogWarning("Unexpected message with CorrelationId {CorrelationId} , " +
+                           "Message {message}", correlationId, message);
     }
 
     private bool TryToGetMessageFromQueue(TaskCompletionSourceWithStatus<IRabbitMqResponse> tcs,
         string correlationId, string message, BasicDeliverEventArgs ea)
     {
         try {
-            var response = _rabbitMqResponseFactory.CreateModel(message, ea.RoutingKey);
+            var response = _rabbitMqResponseFactory.CreateModel(message);
             _logger.LogInformation("Response received and deserialized for CorrelationId: {CorrelationId}, Response: {response}", correlationId, response);
             tcs.TrySetResult(response);
             return true;
-        }catch (JsonException jsonEx) {
+        } catch (JsonException jsonEx) {
             tcs.TrySetException(jsonEx);
             return false;
         }
     }
+
 
     public void Dispose()
     {

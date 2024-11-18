@@ -19,37 +19,45 @@ public class TemperatureService : ITemperatureService
         _logger = logger;
     }
 
-    public async Task<TemperatureResponse> GetTemperatureAndHumidifyData(bool withoutMSMicrocontrollerManager = false)
+    public async Task<GeneralResponse<TemperatureHumidityResponse>> GetTemperatureAndHumidifyData(int sensorId = 1, bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
-        var request = new TemperatureRequest
+
+        var temperatureRequest = new TemperatureHumidityRequest
         {
             RequestId = requestId,
-            MethodName = "get-temperature-and-humidify",
-            
-            WithoutMSMicrocontrollerManager = withoutMSMicrocontrollerManager,
-            CreateDate = DateTime.UtcNow,
+            SensorId = sensorId,
+            UseRandomValuesFotTest = useRandomValuesFotTest,
+            RequestDate = DateTime.UtcNow,
+        };
+
+        var generalRequest = new GeneralRequest
+        {
+            RequestId = requestId,
+            RequestType = "TemperatureHumidity",
+            Data = temperatureRequest
         };
 
         try
         {
             var props = _rabbitMqProducer.CreateBasicProperties();
             props.CorrelationId = requestId.ToString();
-            var requestQueueName = "backend.to.msgettemperatureandhumidify.request";
-            props.ReplyTo = "msgettemperatureandhumidify.to.backend.response";
-            // Send message in queue
-            var timeout = new TimeSpan(0, 0, 10);
-            _rabbitMqProducer.SendMessage(request,
-                requestQueueName, props);
-            _logger.LogInformation("Message sent to {requestQueueName} with " +
-                                   "RequestId: {RequestId} , Request: {request}", 
-                requestQueueName, requestId, request);
-            
-            var response = (TemperatureResponse) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
-            _logger.LogInformation("Received response from {props.ReplyTo} for " +
-                                   "RequestId: {RequestId} , Response: {response}", 
-                props.ReplyTo, requestId,  JsonConvert.SerializeObject(response));
+            props.ReplyTo = "msmicrocontrollermanager.to.backend.response";
+            var requestQueueName = "backend.to.msmicrocontrollermanager.request";
+
+            // Отправляем сообщение
+            var timeout = new TimeSpan(0, 0, 30);
+            _rabbitMqProducer.SendMessage(generalRequest, requestQueueName, props);
+        
+            _logger.LogInformation("Message sent to {requestQueueName} with RequestId: {RequestId}, Request: {request}", 
+                requestQueueName, requestId, generalRequest);
+
+            // Ожидание ответа
+            var response = (GeneralResponse<TemperatureHumidityResponse>)await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
+            _logger.LogInformation("Received response from {props.ReplyTo} for RequestId: {RequestId}, Response: {response}", 
+                props.ReplyTo, requestId, JsonConvert.SerializeObject(response));
+
             return response;
         }
         catch (TimeoutException ex)
@@ -63,4 +71,5 @@ public class TemperatureService : ITemperatureService
             throw;
         }
     }
+
 }
