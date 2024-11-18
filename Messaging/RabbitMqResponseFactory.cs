@@ -1,3 +1,4 @@
+using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models;
 using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using Newtonsoft.Json;
@@ -5,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DashboardRaspberryBackend.Messaging;
 
-public class RabbitMqResponseFactory
+public class RabbitMqResponseFactory : IRabbitMqResponseFactory
 {
     private readonly Dictionary<string, Type> _typeMapping;
 
@@ -23,7 +24,7 @@ public class RabbitMqResponseFactory
     {
         var jsonObject = JObject.Parse(message);
 
-        var typeName = jsonObject["Type"]?.ToString();
+        var typeName = jsonObject["Type"]?.ToString() ?? "Unknown";
         if (!_typeMapping.TryGetValue(typeName, out var responseType))
         {
             throw new InvalidOperationException($"Unknown type: {typeName}");

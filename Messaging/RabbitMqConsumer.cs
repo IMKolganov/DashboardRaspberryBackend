@@ -121,6 +121,10 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         } catch (JsonException jsonEx) {
             tcs.TrySetException(jsonEx);
             return false;
+        } catch (Exception ex) {
+            _logger.LogError(ex, "Unhandled error during message processing.");
+            tcs.TrySetException(ex);
+            return false;
         }
     }
 
