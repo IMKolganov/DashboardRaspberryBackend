@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using DashboardRaspberryBackend.Services.Interfaces;
+using SharedRequests.SmartGarden.Models;
+using SharedRequests.SmartGarden.Models.Responses;
 
 namespace DashboardRaspberryBackend.Controllers;
 
@@ -25,7 +27,7 @@ public class ApiController : BaseApiController
     [HttpGet("GetTemperatureAndHumidify")]
     public async Task<IActionResult> GetTemperatureAndHumidify(int sensorId = 1, bool useRandomValuesFotTest = false)
     {
-        var data = await _temperatureService.GetTemperatureAndHumidifyData(sensorId, useRandomValuesFotTest);
+        var data = (IGeneralResponse<TemperatureHumidityResponse>)await _temperatureService.GetTemperatureAndHumidifyData(sensorId, useRandomValuesFotTest);
         return Ok(data);
     }
     

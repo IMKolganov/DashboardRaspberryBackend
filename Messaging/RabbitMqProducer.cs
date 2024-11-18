@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using DashboardRaspberryBackend.Messaging.Interfaces;
-using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 

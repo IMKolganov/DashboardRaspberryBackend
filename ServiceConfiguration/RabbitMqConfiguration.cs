@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using DashboardRaspberryBackend.Messaging;
 using DashboardRaspberryBackend.Messaging.Interfaces;
-using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using DashboardRaspberryBackend.ServiceConfiguration.SettingModels;
 using DashboardRaspberryBackend.Services;
 using DashboardRaspberryBackend.Services.Interfaces;

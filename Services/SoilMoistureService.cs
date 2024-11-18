@@ -1,7 +1,9 @@
 ﻿using DashboardRaspberryBackend.Messaging.Interfaces;
-using DashboardRaspberryBackend.Messaging.Models;
 using DashboardRaspberryBackend.Services.Interfaces;
 using Newtonsoft.Json;
+using SharedRequests.SmartGarden.Models;
+using SharedRequests.SmartGarden.Models.Requests;
+using SharedRequests.SmartGarden.Models.Responses;
 
 namespace DashboardRaspberryBackend.Services;
 
@@ -19,7 +21,7 @@ public class SoilMoistureService : ISoilMoistureService
         _logger = logger;
     }
 
-    public async Task<GeneralResponse<SoilMoistureResponse>> GetSoilMoistureData(int sensorId = 0, bool useRandomValuesFotTest = false)
+    public async Task<GeneralResponse<SoilMoistureResponse?>> GetSoilMoistureData(int sensorId = 0, bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
@@ -50,11 +52,20 @@ public class SoilMoistureService : ISoilMoistureService
             _logger.LogInformation("Message sent to backend.to.msmicrocontrollermanager.request with " +
                                    "RequestId: {RequestId} , Request: {generalRequest}", requestId, generalRequest);
             
-            var response = (GeneralResponse<SoilMoistureResponse>) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
+            var response = await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
             _logger.LogInformation("Received response from msmicrocontrollermanager.to.backend.response for " +
                                    "RequestId: {RequestId} , Response: {response}", 
                 requestId,  JsonConvert.SerializeObject(response));
-            return response;
+            
+            return new GeneralResponse<SoilMoistureResponse?>
+            {
+                RequestId = response.RequestId,
+                Success = response?.Success ?? false,
+                Message = response?.Message ?? string.Empty,
+                ErrorMessage = response?.ErrorMessage ?? string.Empty,
+                ResponseDate = response?.ResponseDate ?? DateTime.Now,
+                Data = response?.Data != null ? (SoilMoistureResponse)response.Data : null
+            };
         }
         catch (TimeoutException ex)
         {

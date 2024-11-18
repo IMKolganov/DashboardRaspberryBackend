@@ -1,8 +1,9 @@
-using DashboardRaspberryBackend.Messaging.Models.Interfaces;
+using SharedRequests.SmartGarden.Models;
+using SharedRequests.SmartGarden.Models.Responses;
 
 namespace DashboardRaspberryBackend.Messaging.Interfaces;
 
 public interface IRabbitMqResponseFactory
 {
-    IRabbitMqResponse CreateModel(string json);
+    IGeneralResponse<IResponse> CreateModel(string json);
 }

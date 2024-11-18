@@ -1,7 +1,9 @@
 ﻿using DashboardRaspberryBackend.Messaging.Interfaces;
-using DashboardRaspberryBackend.Messaging.Models;
 using DashboardRaspberryBackend.Services.Interfaces;
 using Newtonsoft.Json;
+using SharedRequests.SmartGarden.Models;
+using SharedRequests.SmartGarden.Models.Requests;
+using SharedRequests.SmartGarden.Models.Responses;
 
 namespace DashboardRaspberryBackend.Services;
 
@@ -19,7 +21,7 @@ public class PumpService : IPumpService
         _logger = logger;
     }
 
-    public async Task<GeneralResponse<PumpSwitcherResponse>> StartPum(int pumpId = 0, int pumpDuration = 5, bool useRandomValuesFotTest = false)
+    public async Task<GeneralResponse<IResponse?>> StartPum(int pumpId = 0, int pumpDuration = 5, bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
@@ -51,11 +53,19 @@ public class PumpService : IPumpService
             _logger.LogInformation("Message sent to backend.to.msmicrocontrollermanager.request with " +
                                    "RequestId: {RequestId} , Request: {generalRequest}", requestId, generalRequest);
             
-            var response = (GeneralResponse<PumpSwitcherResponse>) await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
+            var response = await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
             _logger.LogInformation("Received response from msmicrocontrollermanager.to.backend.response for " +
                                    "RequestId: {RequestId} , Response: {response}", 
                 requestId,  JsonConvert.SerializeObject(response));
-            return response;
+            
+            return new GeneralResponse<IResponse?>
+            {
+                RequestId = response.RequestId,
+                Success = false,
+                Message = response.Message,
+                ResponseDate = response.ResponseDate,
+                Data = response.Data ?? null
+            };
         }
         catch (TimeoutException ex)
         {

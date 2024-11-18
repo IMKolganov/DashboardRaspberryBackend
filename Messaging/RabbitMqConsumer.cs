@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using DashboardRaspberryBackend.Messaging.Interfaces;
-using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using DashboardRaspberryBackend.Messaging.Synchronization;
-using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using SharedRequests.SmartGarden.Models;
+using SharedRequests.SmartGarden.Models.Responses;
 
 namespace DashboardRaspberryBackend.Messaging;
 
@@ -15,7 +15,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
-    private readonly ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IRabbitMqResponse>> _pendingRequests;
+    private readonly ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IGeneralResponse<IResponse>>> _pendingRequests;
     private readonly ConcurrentDictionary<string, ManualResetEventSlim> _awaitedMessages;
     private readonly IRabbitMqResponseFactory _rabbitMqResponseFactory;
     private readonly ILogger<RabbitMqConsumer> _logger;
@@ -31,7 +31,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         _channel = _connection.CreateModel();
         _rabbitMqResponseFactory = rabbitMqResponseFactory;
         _logger = logger;
-        _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IRabbitMqResponse>>();
+        _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSourceWithStatus<IGeneralResponse<IResponse>>>();
         _awaitedMessages = new ConcurrentDictionary<string, ManualResetEventSlim>();
 
         foreach (var queueName in queueNames)
@@ -56,9 +56,9 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
         _awaitedMessages[correlationId] = awaitEvent;
     }
 
-    public async Task<IRabbitMqResponse> GetMessageAsync(string correlationId, TimeSpan timeout)
+    public async Task<IGeneralResponse<IResponse>> GetMessageAsync(string correlationId, TimeSpan timeout)
     {
-        var tcs = new TaskCompletionSourceWithStatus<IRabbitMqResponse>();
+        var tcs = new TaskCompletionSourceWithStatus<IGeneralResponse<IResponse>>();
         _pendingRequests[correlationId] = tcs;
 
         _logger.LogInformation("Request with CorrelationId {correlationId} registered.", correlationId);
@@ -110,7 +110,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer, IDisposable
                            "Message {message}", correlationId, message);
     }
 
-    private bool TryToGetMessageFromQueue(TaskCompletionSourceWithStatus<IRabbitMqResponse> tcs,
+    private bool TryToGetMessageFromQueue(TaskCompletionSourceWithStatus<IGeneralResponse<IResponse>> tcs,
         string correlationId, string message, BasicDeliverEventArgs ea)
     {
         try {

@@ -1,7 +1,9 @@
 ﻿using DashboardRaspberryBackend.Messaging.Interfaces;
-using DashboardRaspberryBackend.Messaging.Models;
 using DashboardRaspberryBackend.Services.Interfaces;
 using Newtonsoft.Json;
+using SharedRequests.SmartGarden.Models;
+using SharedRequests.SmartGarden.Models.Requests;
+using SharedRequests.SmartGarden.Models.Responses;
 
 namespace DashboardRaspberryBackend.Services;
 
@@ -19,7 +21,8 @@ public class TemperatureService : ITemperatureService
         _logger = logger;
     }
 
-    public async Task<GeneralResponse<TemperatureHumidityResponse>> GetTemperatureAndHumidifyData(int sensorId = 1, bool useRandomValuesFotTest = false)
+    public async Task<IGeneralResponse<TemperatureHumidityResponse?>> GetTemperatureAndHumidifyData(int sensorId = 1,
+        bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
@@ -54,11 +57,21 @@ public class TemperatureService : ITemperatureService
                 requestQueueName, requestId, generalRequest);
 
             // Ожидание ответа
-            var response = (GeneralResponse<TemperatureHumidityResponse>)await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
+            var response = await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
             _logger.LogInformation("Received response from {props.ReplyTo} for RequestId: {RequestId}, Response: {response}", 
                 props.ReplyTo, requestId, JsonConvert.SerializeObject(response));
+            
+            var result = new GeneralResponse<TemperatureHumidityResponse?>
+            {
+                RequestId = response.RequestId,
+                Success = response?.Success ?? false,
+                Message = response?.Message ?? string.Empty,
+                ErrorMessage = response?.ErrorMessage ?? string.Empty,
+                ResponseDate = response?.ResponseDate ?? DateTime.Now,
+                Data = response?.Data != null ? (TemperatureHumidityResponse)response.Data : null
+            };
 
-            return response;
+            return result;
         }
         catch (TimeoutException ex)
         {

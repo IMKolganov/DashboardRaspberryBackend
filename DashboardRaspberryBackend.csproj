@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="sharedrequests" Version="1.0.8" />
+    <PackageReference Include="sharedrequests" Version="1.0.13" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -25,6 +25,7 @@
     <None Remove="Middleware\Extensions\" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Messaging\Models\" />
     <Folder Include="Middleware\" />
     <Folder Include="Middleware\Extensions\" />
   </ItemGroup>
