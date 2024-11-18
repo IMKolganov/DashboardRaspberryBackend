@@ -32,7 +32,13 @@ public class GlobalExceptionHandlerMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-        var result = JsonSerializer.Serialize(new { error = exception.Message });
+        var result = JsonSerializer.Serialize(new
+        {
+            Success = false, 
+            Message = exception.Message, 
+            Description = exception.InnerException?.Message,
+            Code = (int)HttpStatusCode.InternalServerError
+        });
         return context.Response.WriteAsync(result);
     }
 }

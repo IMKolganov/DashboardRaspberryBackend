@@ -4,5 +4,5 @@ namespace DashboardRaspberryBackend.Messaging.Interfaces;
 
 public interface IRabbitMqResponseFactory
 {
-    IRabbitMqResponse CreateModel(string json, string modelType);
+    IRabbitMqResponse CreateModel(string json);
 }

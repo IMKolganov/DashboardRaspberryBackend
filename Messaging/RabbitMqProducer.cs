@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using DashboardRaspberryBackend.Messaging.Interfaces;
 using DashboardRaspberryBackend.Messaging.Models.Interfaces;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace DashboardRaspberryBackend.Messaging;
 
@@ -14,14 +16,32 @@ public class RabbitMqProducer : IRabbitMqProducer, IDisposable
     
     public RabbitMqProducer(string hostname, List<string> queueNames)
     {
-        var factory = new ConnectionFactory() { HostName = hostname };
-        _connection = factory.CreateConnection();
-        _channel = _connection.CreateModel();
-        
-        foreach (var queueName in queueNames)
+        try
         {
-            _channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false,
-                arguments: null);
+            var factory = new ConnectionFactory() { HostName = hostname };
+            _connection = factory.CreateConnection();
+            _channel = _connection.CreateModel();
+
+            foreach (var queueName in queueNames)
+            {
+                _channel.QueueDeclare(queue: queueName, durable: false, exclusive: false, autoDelete: false,
+                    arguments: null);
+            }
+        }
+        catch (BrokerUnreachableException ex)
+        {
+            Console.WriteLine($"RabbitMQ server is unreachable: {ex.Message}");
+            throw new InvalidOperationException("BackendError - Could not connect to RabbitMQ server.", ex);
+        }
+        catch (SocketException ex)
+        {
+            Console.WriteLine($"Socket error: {ex.Message}");
+            throw new InvalidOperationException("BackendError - Network error while connecting to RabbitMQ.", ex);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected error: {ex.Message}");
+            throw new InvalidOperationException("BackendError - An unexpected error occurred while initializing RabbitMQ producer.", ex);
         }
     }
 

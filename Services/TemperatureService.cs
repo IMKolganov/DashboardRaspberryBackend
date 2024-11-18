@@ -19,17 +19,17 @@ public class TemperatureService : ITemperatureService
         _logger = logger;
     }
 
-    public async Task<GeneralResponse<TemperatureResponse>> GetTemperatureAndHumidifyData(bool withoutMSMicrocontrollerManager = false)
+    public async Task<GeneralResponse<TemperatureHumidityResponse>> GetTemperatureAndHumidifyData(int sensorId = 1, bool useRandomValuesFotTest = false)
     {
         var requestId = Guid.NewGuid();
         _rabbitMqConsumer.RegisterAwaitedMessage(requestId.ToString());
 
-        var temperatureRequest = new TemperatureRequest
+        var temperatureRequest = new TemperatureHumidityRequest
         {
             RequestId = requestId,
-            SensorId = 1,
-            WithoutMsMicrocontrollerManager = withoutMSMicrocontrollerManager,
-            CreateDate = DateTime.UtcNow,
+            SensorId = sensorId,
+            UseRandomValuesFotTest = useRandomValuesFotTest,
+            RequestDate = DateTime.UtcNow,
         };
 
         var generalRequest = new GeneralRequest
@@ -47,14 +47,14 @@ public class TemperatureService : ITemperatureService
             var requestQueueName = "backend.to.msmicrocontrollermanager.request";
 
             // Отправляем сообщение
-            var timeout = new TimeSpan(0, 0, 10);
+            var timeout = new TimeSpan(0, 0, 30);
             _rabbitMqProducer.SendMessage(generalRequest, requestQueueName, props);
         
             _logger.LogInformation("Message sent to {requestQueueName} with RequestId: {RequestId}, Request: {request}", 
                 requestQueueName, requestId, generalRequest);
 
             // Ожидание ответа
-            var response = (GeneralResponse<TemperatureResponse>)await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
+            var response = (GeneralResponse<TemperatureHumidityResponse>)await _rabbitMqConsumer.GetMessageAsync(requestId.ToString(), timeout);
             _logger.LogInformation("Received response from {props.ReplyTo} for RequestId: {RequestId}, Response: {response}", 
                 props.ReplyTo, requestId, JsonConvert.SerializeObject(response));
 

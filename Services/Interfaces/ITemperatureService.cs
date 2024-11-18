@@ -4,5 +4,5 @@ namespace DashboardRaspberryBackend.Services.Interfaces;
 
 public interface ITemperatureService
 {
-    Task<GeneralResponse<TemperatureResponse>> GetTemperatureAndHumidifyData(bool withoutMSMicrocontrollerManager = false);
+    Task<GeneralResponse<TemperatureHumidityResponse>> GetTemperatureAndHumidifyData(int sensorId = 1, bool useRandomValuesFotTest = false);
 }

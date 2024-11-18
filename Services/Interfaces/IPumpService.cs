@@ -4,5 +4,5 @@ namespace DashboardRaspberryBackend.Services.Interfaces;
 
 public interface IPumpService
 {
-    Task<GeneralResponse<PumpResponse>> StartPum(int pumpId = 0, int seconds = 5, bool withoutMSMicrocontrollerManager = false);
+    Task<GeneralResponse<PumpSwitcherResponse>> StartPum(int pumpId = 0, int pumpDuration = 5, bool useRandomValuesFotTest = false);
 }

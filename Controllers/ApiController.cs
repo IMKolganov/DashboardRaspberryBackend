@@ -23,23 +23,23 @@ public class ApiController : BaseApiController
     }
 
     [HttpGet("GetTemperatureAndHumidify")]
-    public async Task<IActionResult> GetTemperatureAndHumidify(bool withoutMSMicrocontrollerManager = false)
+    public async Task<IActionResult> GetTemperatureAndHumidify(int sensorId = 1, bool useRandomValuesFotTest = false)
     {
-        var data = await _temperatureService.GetTemperatureAndHumidifyData(withoutMSMicrocontrollerManager);
+        var data = await _temperatureService.GetTemperatureAndHumidifyData(sensorId, useRandomValuesFotTest);
         return Ok(data);
     }
     
     [HttpGet("GetSoilMoisture")]
-    public async Task<IActionResult> GetSoilMoisture(int sensorId = 0, bool withoutMSMicrocontrollerManager = false)
+    public async Task<IActionResult> GetSoilMoisture(int sensorId = 0, bool useRandomValuesFotTest = false)
     {
-        var data = await _soilMoistureService.GetSoilMoistureData(sensorId, withoutMSMicrocontrollerManager);
+        var data = await _soilMoistureService.GetSoilMoistureData(sensorId, useRandomValuesFotTest);
         return Ok(data);
     }
     
     [HttpPost("StartPum")]
-    public async Task<IActionResult> StartPum(int pumpId = 0, int seconds = 5, bool withoutMSMicrocontrollerManager = false)
+    public async Task<IActionResult> StartPum(int pumpId = 0, int pumpDuration = 5, bool useRandomValuesFotTest = false)
     {
-        var data = await _pumpService.StartPum(pumpId, seconds, withoutMSMicrocontrollerManager);
+        var data = await _pumpService.StartPum(pumpId, pumpDuration, useRandomValuesFotTest);
         return Ok(data);
     }
 }
